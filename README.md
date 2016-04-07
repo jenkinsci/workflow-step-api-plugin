@@ -1,8 +1,8 @@
 # Writing Pipeline steps
 
 Plugins can implement custom Pipeline steps with specialized behavior by adding a dependency on `workflow-step-api`.
-Remember to ensure that your baseline Jenkins version is at least as new as that required by the version of Pipeline you are depending on.
-(The [changelog](../CHANGES.md) notes these baselines.)
+Remember to ensure that your baseline Jenkins version is at least as new as that required by the versions of various Pipeline component plugins you are depending on.
+(The plugin wikis will note these baselines.)
 
 ## Creating a basic synchronous step
 
