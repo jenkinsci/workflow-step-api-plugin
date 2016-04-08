@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 import javax.annotation.CheckForNull;
@@ -77,16 +76,11 @@ public abstract class BodyInvoker {
     /**
      * Sets a human readable name that describes this body invocation.
      *
-     * Specify {@code null} to designate that this body invocation is anonymous.
-     *
-     * <p>
-     * When used from the workflow plugin, anonymous body invocation suppress the generation
-     * of {@code BlockStartNode}/{@code BlockEndNode} to designate the body. This is
-     * useful when a {@link Step} executes body at most once.
+     * By default, this body invocation is anonymous.
      *
      * @return this object
      */
-    public abstract BodyInvoker withDisplayName(@Nullable String name);
+    public abstract BodyInvoker withDisplayName(@Nonnull String name);
 
     /**
      * Registers a callback that tracks the progress of the body execution.
