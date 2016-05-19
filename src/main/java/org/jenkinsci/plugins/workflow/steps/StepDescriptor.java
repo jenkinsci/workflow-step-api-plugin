@@ -76,8 +76,8 @@ public abstract class StepDescriptor extends Descriptor<Step> {
     public abstract String getFunctionName();
 
     /**
-     * Returns true if this step can accept implicit block as the argument.
-     *
+     * Return true if this step can accept an implicit block argument.
+     * (If it can, but it is called without a block, {@link StepContext#hasBody} will be false.)
      * @see StepContext#newBodyInvoker()
      */
     public boolean takesImplicitBlockArgument() {

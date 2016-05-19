@@ -113,8 +113,23 @@ public abstract class StepContext implements FutureCallback<Object>, Serializabl
      *
      * <p>
      * {@link StepDescriptor#takesImplicitBlockArgument} must be true.
+     * @throws IllegalStateException if {@link #hasBody} is false
      */
-    public abstract BodyInvoker newBodyInvoker();
+    public abstract BodyInvoker newBodyInvoker() throws IllegalStateException;
+
+    /**
+     * Checks if this step was called with a body.
+     * @return true if {@link StepDescriptor#takesImplicitBlockArgument} is true, and such a body was in fact passed in; false otherwise
+     */
+    public boolean hasBody() {
+        // Default implementation, but should be overridden:
+        try {
+            newBodyInvoker();
+            return true;
+        } catch (IllegalStateException x) {
+            return false;
+        }
+    }
 
     /**
      * {@link StepContext}s get persisted, so they may not have the identity equality, but equals
