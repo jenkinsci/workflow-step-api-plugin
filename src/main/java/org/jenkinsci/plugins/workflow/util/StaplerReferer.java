@@ -44,7 +44,7 @@ public class StaplerReferer {
 
     private static final Logger LOGGER = Logger.getLogger(StaplerReferer.class.getName());
 
-    private static final Pattern REFERER = Pattern.compile(".+?((/job/[^/]+)+)/configure");
+    private static final Pattern REFERER = Pattern.compile(".+?((/job/[^/]+)+)/.+");
 
     static @CheckForNull String itemFromReferer(@Nonnull String referer) {
         Matcher m = REFERER.matcher(referer);
