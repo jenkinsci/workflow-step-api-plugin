@@ -93,6 +93,14 @@ public abstract class StepExecution implements Serializable {
     public void onResume() {}
 
     /**
+     * May be overridden to provide specific information about what a step is currently doing, for diagnostic purposes.
+     * <p>{@inheritDoc}
+     */
+    @Override public String toString() {
+        return super.toString();
+    }
+
+    /**
      * Apply the given function to all the active running {@link StepExecution}s in the system.
      *
      * @return
