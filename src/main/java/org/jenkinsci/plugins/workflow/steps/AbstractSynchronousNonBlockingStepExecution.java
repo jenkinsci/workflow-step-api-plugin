@@ -8,6 +8,7 @@ import hudson.util.NamingThreadFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import javax.annotation.Nonnull;
 import jenkins.model.Jenkins;
 import jenkins.security.NotReallyRoleSensitiveCallable;
 import org.acegisecurity.Authentication;
@@ -74,7 +75,7 @@ public abstract class AbstractSynchronousNonBlockingStepExecution<T> extends Abs
         getContext().onFailure(new Exception("Resume after a restart not supported for non-blocking synchronous steps"));
     }
 
-    @Override public String toString() {
+    @Override public @Nonnull String getStatus() {
         if (threadName != null) {
             return "running in thread: " + threadName;
         } else {

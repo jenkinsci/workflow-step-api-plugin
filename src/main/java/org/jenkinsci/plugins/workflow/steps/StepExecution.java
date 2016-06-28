@@ -104,6 +104,7 @@ public abstract class StepExecution implements Serializable {
      * Typical format should be a short, lowercase phrase.
      * It should not be localized as this is intended for use by developers as well as users.
      * May include technical details about Jenkins internals if relevant.
+     * @return current status, or null if unimplemented
      */
     public @CheckForNull String getStatus() {
         return null;
