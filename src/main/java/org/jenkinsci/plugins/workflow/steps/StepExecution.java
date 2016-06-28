@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.CheckForNull;
 
 /**
  * Scoped to a single execution of {@link Step}, and provides insights into what's going on
@@ -92,12 +93,20 @@ public abstract class StepExecution implements Serializable {
      */
     public void onResume() {}
 
+    @Override public String toString() {
+        String supe = super.toString();
+        String status = getStatus();
+        return status != null ? supe + "(" + status + ")" : supe;
+    }
+
     /**
      * May be overridden to provide specific information about what a step is currently doing, for diagnostic purposes.
-     * <p>{@inheritDoc}
+     * Typical format should be a short, lowercase phrase.
+     * It should not be localized as this is intended for use by developers as well as users.
+     * May include technical details about Jenkins internals if relevant.
      */
-    @Override public String toString() {
-        return super.toString();
+    public @CheckForNull String getStatus() {
+        return null;
     }
 
     /**
