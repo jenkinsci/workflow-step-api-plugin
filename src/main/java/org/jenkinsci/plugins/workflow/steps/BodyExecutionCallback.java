@@ -112,19 +112,20 @@ public abstract class BodyExecutionCallback implements Serializable {
         @Override public final void onSuccess(StepContext context, Object result) {
             try {
                 finished(context);
-                context.onSuccess(result);
             } catch (Exception x) {
                 context.onFailure(x);
+                return;
             }
+            context.onSuccess(result);
         }
 
         @Override public final void onFailure(StepContext context, Throwable t) {
             try {
                 finished(context);
-                context.onFailure(t);
             } catch (Exception x) {
-                context.onFailure(x);
+                t.addSuppressed(x);
             }
+            context.onFailure(t);
         }
 
     }
