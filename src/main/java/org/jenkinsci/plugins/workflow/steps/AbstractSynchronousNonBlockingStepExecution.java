@@ -8,6 +8,7 @@ import hudson.util.NamingThreadFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import javax.annotation.Nonnull;
 import jenkins.model.Jenkins;
 import jenkins.security.NotReallyRoleSensitiveCallable;
 import org.acegisecurity.Authentication;
@@ -20,6 +21,7 @@ import org.acegisecurity.Authentication;
 public abstract class AbstractSynchronousNonBlockingStepExecution<T> extends AbstractStepExecutionImpl {
 
     private transient volatile Future<?> task;
+    private transient String threadName;
 
     private static ExecutorService executorService;
 
@@ -46,6 +48,7 @@ public abstract class AbstractSynchronousNonBlockingStepExecution<T> extends Abs
                 try {
                     getContext().onSuccess(ACL.impersonate(auth, new NotReallyRoleSensitiveCallable<T, Exception>() {
                         @Override public T call() throws Exception {
+                            threadName = Thread.currentThread().getName();
                             return AbstractSynchronousNonBlockingStepExecution.this.run();
                         }
                     }));
@@ -70,6 +73,14 @@ public abstract class AbstractSynchronousNonBlockingStepExecution<T> extends Abs
     @Override
     public void onResume() {
         getContext().onFailure(new Exception("Resume after a restart not supported for non-blocking synchronous steps"));
+    }
+
+    @Override public @Nonnull String getStatus() {
+        if (threadName != null) {
+            return "running in thread: " + threadName;
+        } else {
+            return "not yet scheduled";
+        }
     }
 
     private static synchronized ExecutorService getExecutorService() {

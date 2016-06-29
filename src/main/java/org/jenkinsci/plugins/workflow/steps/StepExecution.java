@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.CheckForNull;
 
 /**
  * Scoped to a single execution of {@link Step}, and provides insights into what's going on
@@ -91,6 +92,23 @@ public abstract class StepExecution implements Serializable {
      * Convenient for re-establishing the polling.
      */
     public void onResume() {}
+
+    @Override public String toString() {
+        String supe = super.toString();
+        String status = getStatus();
+        return status != null ? supe + "(" + status + ")" : supe;
+    }
+
+    /**
+     * May be overridden to provide specific information about what a step is currently doing, for diagnostic purposes.
+     * Typical format should be a short, lowercase phrase.
+     * It should not be localized as this is intended for use by developers as well as users.
+     * May include technical details about Jenkins internals if relevant.
+     * @return current status, or null if unimplemented
+     */
+    public @CheckForNull String getStatus() {
+        return null;
+    }
 
     /**
      * Apply the given function to all the active running {@link StepExecution}s in the system.
