@@ -25,6 +25,7 @@
 package org.jenkinsci.plugins.workflow.steps;
 
 import hudson.ExtensionList;
+import hudson.model.Describable;
 import hudson.model.Descriptor;
 
 import java.io.IOException;
@@ -89,6 +90,52 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      * @return true to exclude from main list of steps
      */
     public boolean isAdvanced() {
+        return false;
+    }
+
+    /**
+     * Some steps, such as {@code CoreStep} or {@code GenericSCMStep} can take
+     * arbitrary {@link Describable}s of a certain type and execute it as a step.
+     * Such a step should return true from this method so that {@link Describable}s that
+     * it supports can be directly written as a step as a short-hand.
+     *
+     * <p>
+     * For example, in Jenkins Pipeline, if there is a meta step that can handle a {@link Describable},
+     * and it has a symbol, it allows the following short-hand:
+     *
+     * <pre>
+     * public class Xyz extends Foo {
+     *     &#64;DataBoundConstructor
+     *     public Xyz(String value) { ... }
+     *
+     *     &#64;Extension &#64;Symbol("xyz")
+     *     public static class DescriptorImpl extends FooDescriptor { ... }
+     * }
+     *
+     * public class MetaStepForFoo extends AbstractStepImpl {
+     *     &#64;DataBoundConstructor
+     *     public MetaStepForFoo(Foo delegate) {
+     *         ...
+     *     }
+     *
+     *     ...
+     *     &#64;Extension
+     *     public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+     *         &#64;Override
+     *         public String getFunctionName() {
+     *             return "metaStepForFoo";
+     *         }
+     *     }
+     * }
+     *
+     * // this is the short-hand that users will use
+     * xyz('hello')
+     * // but this is how it actually gets executed
+     * metaStepForFoo(xyz('hello'))
+     *
+     * </pre>
+     */
+    public boolean isMetaStep() {
         return false;
     }
 
