@@ -34,8 +34,11 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jenkinsci.plugins.structs.describable.DescribableModel;
+import org.jenkinsci.plugins.structs.describable.DescribableParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nullable;
@@ -152,6 +155,25 @@ public abstract class StepDescriptor extends Descriptor<Step> {
     }
 
     /**
+     * For a {@linkplain #isMetaStep() meta step}, return the type that this meta step handles.
+     * Otherwise null.
+     */
+    // not @CheckForNull because often the caller is using allMetaStepDescriptors()
+    public final Class<?> getMetaStepArgumentType() {
+        if (!isMetaStep())  return null;
+
+        DescribableModel<?> m = new DescribableModel(clazz);
+        DescribableParameter p = m.getFirstRequiredParameter();
+        if (p==null) {
+            LOGGER.log(Level.WARNING, getClass()+" claims to be a meta-step but it has no parameter in @DataBoundConstructor");
+            // don't punish users for a mistake by a plugin developer. return null instead of throwing an error
+            return null;
+        }
+
+        return p.getErasedType();
+    }
+
+    /**
      * Used when a {@link Step} is instantiated programmatically.
      * The default implementation just uses {@link DescribableModel#instantiate}.
      * @param arguments
@@ -202,4 +224,6 @@ public abstract class StepDescriptor extends Descriptor<Step> {
             }
         });
     }
+
+    private static final Logger LOGGER = Logger.getLogger(StepDescriptor.class.getName());
 }
