@@ -24,6 +24,8 @@
 
 package org.jenkinsci.plugins.workflow.steps;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import hudson.ExtensionList;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
@@ -35,6 +37,8 @@ import java.util.Set;
 
 import org.jenkinsci.plugins.structs.describable.DescribableModel;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import javax.annotation.Nullable;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -185,5 +189,17 @@ public abstract class StepDescriptor extends Descriptor<Step> {
 
     public static ExtensionList<StepDescriptor> all() {
         return ExtensionList.lookup(StepDescriptor.class);
+    }
+
+    /**
+     * Convenience method to iterate all meta step descriptors.
+     */
+    public static Iterable<StepDescriptor> allMetaStepDescriptors() {
+        return Iterables.filter(all(), new Predicate<StepDescriptor>() {
+            @Override
+            public boolean apply(StepDescriptor i) {
+                return i.isMetaStep();
+            }
+        });
     }
 }
