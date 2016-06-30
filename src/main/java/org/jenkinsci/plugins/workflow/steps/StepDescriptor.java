@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jenkinsci.plugins.structs.describable.DescribableModel;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -100,6 +101,10 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      * it supports can be directly written as a step as a short-hand.
      *
      * <p>
+     * Meta-step works as an invisible adapter that creates an illusion that {@link Describable}s are
+     * steps.
+     *
+     * <p>
      * For example, in Jenkins Pipeline, if there is a meta step that can handle a {@link Describable},
      * and it has a symbol, it allows the following short-hand:
      *
@@ -132,8 +137,11 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      * xyz('hello')
      * // but this is how it actually gets executed
      * metaStepForFoo(xyz('hello'))
-     *
      * </pre>
+     *
+     * <p>
+     * Meta-step must have a {@link DataBoundConstructor} whose first argument represents a
+     * {@link Describable} that it handles.
      */
     public boolean isMetaStep() {
         return false;
