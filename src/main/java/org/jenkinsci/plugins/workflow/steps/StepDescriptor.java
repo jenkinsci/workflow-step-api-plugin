@@ -219,8 +219,8 @@ public abstract class StepDescriptor extends Descriptor<Step> {
     public static Iterable<StepDescriptor> allMeta() {
         return Iterables.filter(all(), new Predicate<StepDescriptor>() {
             @Override
-            public boolean apply(StepDescriptor i) {
-                return i.isMetaStep();
+            public boolean apply(@Nullable StepDescriptor i) {
+                return i!=null && i.isMetaStep();
             }
         });
     }
