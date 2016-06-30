@@ -158,7 +158,7 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      * For a {@linkplain #isMetaStep() meta step}, return the type that this meta step handles.
      * Otherwise null.
      */
-    // not @CheckForNull because often the caller is using allMetaStepDescriptors()
+    // not @CheckForNull because often the caller is using allMeta()
     public final Class<?> getMetaStepArgumentType() {
         if (!isMetaStep())  return null;
 
@@ -216,7 +216,7 @@ public abstract class StepDescriptor extends Descriptor<Step> {
     /**
      * Convenience method to iterate all meta step descriptors.
      */
-    public static Iterable<StepDescriptor> allMetaStepDescriptors() {
+    public static Iterable<StepDescriptor> allMeta() {
         return Iterables.filter(all(), new Predicate<StepDescriptor>() {
             @Override
             public boolean apply(StepDescriptor i) {
