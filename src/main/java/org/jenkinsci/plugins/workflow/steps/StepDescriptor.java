@@ -27,18 +27,23 @@ package org.jenkinsci.plugins.workflow.steps;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import hudson.ExtensionList;
+import hudson.Util;
+import hudson.console.ConsoleLogFilter;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import hudson.model.Run;
 import org.jenkinsci.plugins.structs.describable.DescribableModel;
 import org.jenkinsci.plugins.structs.describable.DescribableParameter;
+import org.jenkinsci.plugins.structs.describable.UninstantiatedDescribable;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nullable;
@@ -191,9 +196,33 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      * @param step a fully-configured step (assignable to {@link #clazz})
      * @return arguments that could be passed to {@link #newInstance} to create a similar step instance
      * @throws UnsupportedOperationException if this descriptor lacks the ability to do such a calculation
+     * @deprecated
+     *      Use {@link #defineArguments2(Step)}
      */
     public Map<String,Object> defineArguments(Step step) throws UnsupportedOperationException {
-        return DescribableModel.uninstantiate_(step);
+        if (Util.isOverridden(StepDescriptor.class, getClass(), "defineArguments2", Step.class)) {
+            // if the subtype has defined the defineArguments2() method, delegate to that
+            return defineArguments2(step).toMap();
+        } else {
+            // otherwise assume legacy usage
+            return DescribableModel.uninstantiate_(step);
+        }
+    }
+
+    /**
+     * Determine which arguments went into the configuration of a step configured through a form submission.
+     * @param step a fully-configured step (assignable to {@link #clazz})
+     * @return arguments that could be passed to {@link #newInstance} to create a similar step instance
+     * @throws UnsupportedOperationException if this descriptor lacks the ability to do such a calculation
+     */
+    public UninstantiatedDescribable defineArguments2(Step step) throws UnsupportedOperationException {
+        if (Util.isOverridden(StepDescriptor.class, getClass(), "defineArguments2", Step.class)) {
+            // newer clients are called older implementations
+            return new UninstantiatedDescribable(defineArguments(step));
+        } else {
+            // the default behaviour in the absence of any overrides
+            return DescribableModel.uninstantiate2_(step);
+        }
     }
 
 
