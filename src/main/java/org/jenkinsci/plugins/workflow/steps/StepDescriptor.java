@@ -171,9 +171,10 @@ public abstract class StepDescriptor extends Descriptor<Step> {
         DescribableParameter p = m.getFirstRequiredParameter();
         if (p==null) {
             LOGGER.log(Level.WARNING, getClass()+" claims to be a meta-step but it has no parameter in @DataBoundConstructor");
-            // don't punish users for a mistake by a plugin developer. return null instead of throwing an error.
-            // returning a type that doesn't match anything normally prevents this broken StepDescriptor from getting used.
-            return Void.class;
+            // don't punish users for a mistake by a plugin developer. return an error value instead of throwing an error
+            // or return null which usually breaks the caller.
+            // here, returning a type that doesn't match anything normally prevents this broken StepDescriptor from getting used.
+            return Void.TYPE;
         }
 
         return p.getErasedType();
