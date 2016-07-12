@@ -219,7 +219,18 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      */
     public UninstantiatedDescribable uninstantiate(Step step) throws UnsupportedOperationException {
         if (Util.isOverridden(StepDescriptor.class, getClass(), "uninstantiate", Step.class)) {
-            // newer clients are called older implementations
+            // Newer clients are called older implementations.
+            // We could conceivably inspect the returned Map and try to recreate UninstantiatedDescribable recursively,
+            // but there's a little gain to be had from that.
+            //
+            // A literal map is a valid part of the object graph in UninstantiatedDescribable, and here we'll just
+            // produce that with a map entry named "$class", thus return value is already legal as per contract.
+            //
+            // Even if we try, we cannot reliably look at such a map and recreate a UninstantiatedDescribable
+            // without knowing the expected type.
+            //
+            // Jesse and KK talked about this during this change and we felt it's OK for legacy step implementations
+            // to behave poorly wrt snippetizer (as in, produce ugly example that uses $class)
             return new UninstantiatedDescribable(defineArguments(step));
         } else {
             // the default behaviour in the absence of any overrides
