@@ -268,5 +268,16 @@ public abstract class StepDescriptor extends Descriptor<Step> {
         });
     }
 
+    /**
+     * Obtains a {@link StepDescriptor} by its function name, or null if not found.
+     */
+    public static @Nullable StepDescriptor byFunctionName(String name) {
+        for (StepDescriptor d : all()) {
+            if (d.getFunctionName().equals(name))
+                return d;
+        }
+        return null;
+    }
+
     private static final Logger LOGGER = Logger.getLogger(StepDescriptor.class.getName());
 }
