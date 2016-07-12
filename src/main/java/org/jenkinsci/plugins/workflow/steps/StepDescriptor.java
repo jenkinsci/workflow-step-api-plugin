@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.jenkinsci.plugins.structs.SymbolLookup;
 import org.jenkinsci.plugins.structs.describable.DescribableModel;
 import org.jenkinsci.plugins.structs.describable.DescribableParameter;
 import org.jenkinsci.plugins.structs.describable.UninstantiatedDescribable;
@@ -278,6 +279,21 @@ public abstract class StepDescriptor extends Descriptor<Step> {
         }
         return null;
     }
+
+    /**
+     * Given a symbol, attempt to find a meta-step that can consume this symbol.
+     */
+    public static @Nullable StepDescriptor metaStepOf(String symbol) {
+        // honor ordinals among meta-steps
+        for (StepDescriptor d : StepDescriptor.allMeta()) {
+            Class<?> a = d.getMetaStepArgumentType();
+            if (a==null)    continue;   // defensive check
+            if (SymbolLookup.get().findDescriptor(a,symbol)!=null)
+                return d;
+        }
+        return null;
+    }
+
 
     private static final Logger LOGGER = Logger.getLogger(StepDescriptor.class.getName());
 }
