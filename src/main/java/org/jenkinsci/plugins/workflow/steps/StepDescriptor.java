@@ -164,8 +164,7 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      * For a {@linkplain #isMetaStep() meta step}, return the type that this meta step handles.
      * Otherwise null.
      */
-    // not @CheckForNull because often the caller is using allMeta()
-    public final Class<?> getMetaStepArgumentType() {
+    public final @Nullable Class<?> getMetaStepArgumentType() {
         if (!isMetaStep())  return null;
 
         DescribableModel<?> m = new DescribableModel(clazz);
