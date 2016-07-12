@@ -30,7 +30,14 @@ import hudson.ExtensionList;
 import hudson.Util;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
+import org.jenkinsci.plugins.structs.SymbolLookup;
+import org.jenkinsci.plugins.structs.describable.DescribableModel;
+import org.jenkinsci.plugins.structs.describable.DescribableParameter;
+import org.jenkinsci.plugins.structs.describable.UninstantiatedDescribable;
+import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,14 +46,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.jenkinsci.plugins.structs.SymbolLookup;
-import org.jenkinsci.plugins.structs.describable.DescribableModel;
-import org.jenkinsci.plugins.structs.describable.DescribableParameter;
-import org.jenkinsci.plugins.structs.describable.UninstantiatedDescribable;
-import org.kohsuke.stapler.DataBoundConstructor;
-
-import javax.annotation.Nullable;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -287,7 +286,7 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      *
      * When the returned list is bigger than size 1, it means there's ambiguity in how to process it.
      */
-    public static @Nullable List<StepDescriptor> metaStepsOf(String symbol) {
+    public static @Nonnull List<StepDescriptor> metaStepsOf(String symbol) {
         List<StepDescriptor> r = new ArrayList<>();
         // honor ordinals among meta-steps
         for (StepDescriptor d : StepDescriptor.allMeta()) {
