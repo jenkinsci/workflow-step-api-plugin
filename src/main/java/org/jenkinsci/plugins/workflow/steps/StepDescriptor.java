@@ -32,7 +32,9 @@ import hudson.model.Describable;
 import hudson.model.Descriptor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -281,17 +283,20 @@ public abstract class StepDescriptor extends Descriptor<Step> {
     }
 
     /**
-     * Given a symbol, attempt to find a meta-step that can consume this symbol.
+     * Given a symbol, attempt to find all the meta-steps that can consume this symbol.
+     *
+     * When the returned list is bigger than size 1, it means there's ambiguity in how to process it.
      */
-    public static @Nullable StepDescriptor metaStepOf(String symbol) {
+    public static @Nullable List<StepDescriptor> metaStepsOf(String symbol) {
+        List<StepDescriptor> r = new ArrayList<>();
         // honor ordinals among meta-steps
         for (StepDescriptor d : StepDescriptor.allMeta()) {
             Class<?> a = d.getMetaStepArgumentType();
             if (a==null)    continue;   // defensive check
             if (SymbolLookup.get().findDescriptor(a,symbol)!=null)
-                return d;
+                r.add(d);
         }
-        return null;
+        return r;
     }
 
 
