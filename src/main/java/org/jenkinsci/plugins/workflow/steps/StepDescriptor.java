@@ -139,6 +139,10 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      *         public String getFunctionName() {
      *             return "metaStepForFoo";
      *         }
+     *         &#64;Override
+     *         public boolean isMetaStep() {
+     *             return true;
+     *         }
      *     }
      * }
      *
