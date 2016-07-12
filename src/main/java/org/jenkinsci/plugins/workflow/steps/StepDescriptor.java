@@ -200,6 +200,7 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      * @deprecated
      *      Use {@link #uninstantiate(Step)}
      */
+    @Deprecated
     public Map<String,Object> defineArguments(Step step) throws UnsupportedOperationException {
         if (Util.isOverridden(StepDescriptor.class, getClass(), "uninstantiate", Step.class)) {
             // if the subtype has defined the uninstantiate() method, delegate to that
