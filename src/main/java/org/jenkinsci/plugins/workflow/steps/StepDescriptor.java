@@ -26,6 +26,7 @@ package org.jenkinsci.plugins.workflow.steps;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.ExtensionList;
 import hudson.Util;
 import hudson.model.Describable;
@@ -169,10 +170,10 @@ public abstract class StepDescriptor extends Descriptor<Step> {
     public final @Nullable Class<?> getMetaStepArgumentType() {
         if (!isMetaStep())  return null;
 
-        DescribableModel<?> m = new DescribableModel(clazz);
+        DescribableModel<?> m = new DescribableModel<>(clazz);
         DescribableParameter p = m.getFirstRequiredParameter();
         if (p==null) {
-            LOGGER.log(Level.WARNING, getClass()+" claims to be a meta-step but it has no parameter in @DataBoundConstructor");
+            LOGGER.log(Level.WARNING, "{0} claims to be a meta-step but it has no parameter in @DataBoundConstructor", getClass().getName());
             // don't punish users for a mistake by a plugin developer. return an error value instead of throwing an error
             // or return null which usually breaks the caller.
             // here, returning a type that doesn't match anything normally prevents this broken StepDescriptor from getting used.
@@ -263,9 +264,10 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      */
     public static Iterable<StepDescriptor> allMeta() {
         return Iterables.filter(all(), new Predicate<StepDescriptor>() {
+            @SuppressFBWarnings(value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification="all() will not return nulls")
             @Override
-            public boolean apply(@Nullable StepDescriptor i) {
-                return i!=null && i.isMetaStep();
+            public boolean apply(StepDescriptor i) {
+                return i.isMetaStep();
             }
         });
     }
