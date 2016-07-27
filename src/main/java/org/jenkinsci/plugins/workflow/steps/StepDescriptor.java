@@ -33,8 +33,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jenkinsci.plugins.structs.describable.DescribableModel;
+import org.kohsuke.stapler.ClassDescriptor;
+
+import javax.annotation.CheckForNull;
 
 /**
+ * {@link Descriptor} that provides information about {@link Step}.
+ *
  * @author Kohsuke Kawaguchi
  * @author Jesse Glick
  */
@@ -112,6 +117,25 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      */
     public Map<String,Object> defineArguments(Step step) throws UnsupportedOperationException {
         return DescribableModel.uninstantiate_(step);
+    }
+
+    /**
+     * Some {@link Step} representation in text (such as Jenkins Pipeline) benefits from
+     * the short hand syntax that omits the explicit argument name when there's only one argument.
+     * This method provides that mechanism in which {@link StepDescriptor} can normalize
+     * such single value into a map that can then be fed into {@link #newInstance(Map)}.
+     *
+     * @return
+     *      map that assigns the name to the sole argument. Otherwise
+     *      null if this step does not support the single argument form.
+     */
+    public @CheckForNull Map<String,Object> singleArgument(Object arg) {
+        String[] names = new ClassDescriptor(clazz).loadConstructorParamNames();
+        if (names.length == 1) {
+            return Collections.singletonMap(names[0], arg);
+        } else {
+            return null;
+        }
     }
 
 
