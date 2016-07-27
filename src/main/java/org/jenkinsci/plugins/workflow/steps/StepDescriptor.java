@@ -26,19 +26,14 @@ package org.jenkinsci.plugins.workflow.steps;
 
 import hudson.ExtensionList;
 import hudson.model.Descriptor;
+import org.jenkinsci.plugins.structs.describable.DescribableModel;
+import org.jenkinsci.plugins.structs.describable.DescribableParameter;
 
+import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-
-import org.jenkinsci.plugins.structs.describable.DescribableModel;
-import org.jenkinsci.plugins.structs.describable.DescribableParameter;
-import org.kohsuke.stapler.ClassDescriptor;
-
-import javax.annotation.CheckForNull;
-
-import static com.sun.imageio.plugins.jpeg.JPEG.names;
 
 /**
  * {@link Descriptor} that provides information about {@link Step}.
