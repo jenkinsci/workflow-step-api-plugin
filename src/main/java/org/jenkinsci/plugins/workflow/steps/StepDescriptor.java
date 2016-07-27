@@ -33,9 +33,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jenkinsci.plugins.structs.describable.DescribableModel;
+import org.jenkinsci.plugins.structs.describable.DescribableParameter;
 import org.kohsuke.stapler.ClassDescriptor;
 
 import javax.annotation.CheckForNull;
+
+import static com.sun.imageio.plugins.jpeg.JPEG.names;
 
 /**
  * {@link Descriptor} that provides information about {@link Step}.
@@ -130,9 +133,9 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      *      null if this step does not support the single argument form.
      */
     public @CheckForNull Map<String,Object> singleArgument(Object arg) {
-        String[] names = new ClassDescriptor(clazz).loadConstructorParamNames();
-        if (names.length == 1) {
-            return Collections.singletonMap(names[0], arg);
+        DescribableParameter p = new DescribableModel<>(clazz).getSoleRequiredParameter();
+        if (p!=null) {
+            return Collections.singletonMap(p.getName(), arg);
         } else {
             return null;
         }

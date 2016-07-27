@@ -28,6 +28,9 @@ public class AbstractStepImplTest {
     @Inject
     BogusStep.DescriptorImpl d;
 
+    @Inject
+    OneArgStep.DescriptorImpl d2;
+
     @Before
     public void setUp() {
         j.getInstance().getInjector().injectMembers(this);
@@ -67,6 +70,14 @@ public class AbstractStepImplTest {
 
         assertEquals(step.a, 10);
         assertEquals(step.b, "pre1post");
+    }
+
+    @Test
+    public void singleArgument() throws Exception {
+        assertNull(d.singleArgument("foo"));    // require two arguments
+        Map<String, Object> m = d2.singleArgument("foo");
+        assertEquals(1,m.size());
+        assertEquals("a",m.keySet().iterator().next());
     }
 
     public static class BogusStep extends AbstractStepImpl {
@@ -117,6 +128,33 @@ public class AbstractStepImplTest {
             assertSame(jenkins, Jenkins.getInstance());
             assertSame(n, Jenkins.getInstance());
             return null;
+        }
+    }
+
+    public static class OneArgStep extends AbstractStepImpl {
+        String a;
+
+        @DataBoundConstructor
+        public OneArgStep(String a) {
+            this.a = a;
+        }
+
+        @Extension
+        public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+
+            public DescriptorImpl() {
+                super(BogusStepExecution.class);
+            }
+
+            @Override
+            public String getFunctionName() {
+                return "xxx";
+            }
+
+            @Override
+            public String getDisplayName() {
+                return "yyy";
+            }
         }
     }
 }
