@@ -4,6 +4,8 @@ import hudson.Extension;
 import hudson.model.Node;
 import jenkins.model.Jenkins;
 import org.codehaus.groovy.runtime.GStringImpl;
+
+import static java.util.Collections.singletonMap;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Rule;
@@ -13,6 +15,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.inject.Inject;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,9 +78,7 @@ public class AbstractStepImplTest {
     @Test
     public void singleArgument() throws Exception {
         assertNull(d.singleArgument("foo"));    // require two arguments
-        Map<String, Object> m = d2.singleArgument("foo");
-        assertEquals(1,m.size());
-        assertEquals("a",m.keySet().iterator().next());
+        assertEquals(singletonMap("a","foo"), d2.singleArgument("foo"));
     }
 
     public static class BogusStep extends AbstractStepImpl {
