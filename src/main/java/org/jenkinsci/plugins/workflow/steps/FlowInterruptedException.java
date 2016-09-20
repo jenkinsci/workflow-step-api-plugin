@@ -24,12 +24,14 @@
 
 package org.jenkinsci.plugins.workflow.steps;
 
+import hudson.AbortException;
 import hudson.model.Executor;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import java.util.Arrays;
 import java.util.List;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import jenkins.model.CauseOfInterruption;
 import jenkins.model.InterruptedBuildAction;
@@ -37,9 +39,11 @@ import jenkins.model.InterruptedBuildAction;
 /**
  * Special exception that can be thrown out of {@link StepContext#onFailure} to indicate that the flow was aborted from the inside.
  * (This could be caught like any other exception and rethrown or ignored. It only takes effect if thrown all the way up.)
- * No stack trace is printed, and you can control the {@link Result} and {@link CauseOfInterruption}.
- * Analogous to {@link Executor#interrupt(Result, CauseOfInterruption...)} but does not assume we are running inside an executor thread.
- * There is no need to call this from {@link StepExecution#stop} since in that case the execution owner should have set a {@link CauseOfInterruption.UserInterruption} and {@link Result#ABORTED}.
+ * <p>No stack trace is printed (except by {@link #getCause} and/or {@link #getSuppressed} if present),
+ * and you can control the {@link Result} and {@link CauseOfInterruption}.
+ * <p>Analogous to {@link Executor#interrupt(Result, CauseOfInterruption...)} but does not assume we are running inside an executor thread.
+ * <p>There is no need to call this from {@link StepExecution#stop} since in that case the execution owner
+ * should have set a {@link jenkins.model.CauseOfInterruption.UserInterruption} and {@link Result#ABORTED}.
  */
 public final class FlowInterruptedException extends InterruptedException {
 
@@ -73,6 +77,17 @@ public final class FlowInterruptedException extends InterruptedException {
         run.addAction(new InterruptedBuildAction(causes));
         for (CauseOfInterruption cause : causes) {
             cause.print(listener);
+        }
+        print(getCause(), listener);
+        for (Throwable t : getSuppressed()) {
+            print(t, listener);
+        }
+    }
+    private static void print(@CheckForNull Throwable t, @Nonnull TaskListener listener) {
+        if (t instanceof AbortException) {
+            listener.getLogger().println(t.getMessage());
+        } else if (t != null) {
+            t.printStackTrace(listener.getLogger());
         }
     }
 
