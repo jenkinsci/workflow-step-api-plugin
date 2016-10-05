@@ -82,9 +82,8 @@ public abstract class StepDescriptor extends Descriptor<Step> {
 
 
     /**
-     * Return a short string that is a valid identifier for programming languages
-     * ([A-Za-z_] in the first char and [A-Za-z0-9_]" for all the other chars.
-     *
+     * Return a short string that is a valid identifier for programming languages.
+     * Follow the pattern {@code [a-z][A-Za-z0-9_]*}.
      * Step will be referenced by this name when used in a programming language.
      */
     public abstract String getFunctionName();
