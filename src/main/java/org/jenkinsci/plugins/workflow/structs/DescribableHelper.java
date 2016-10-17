@@ -96,7 +96,7 @@ public class DescribableHelper {
      */
     public static <T> T instantiate(Class<? extends T> clazz, Map<String,?> arguments) throws Exception {
         String[] names = loadConstructorParamNames(clazz);
-        Constructor<T> c = findConstructor(clazz, names.length);
+        Constructor<T> c = DescribableHelper.<T>findConstructor(clazz, names.length);
         Object[] args = buildArguments(clazz, arguments, c.getGenericParameterTypes(), names, true);
         T o = c.newInstance(args);
         injectSetters(o, arguments);
