@@ -3,14 +3,19 @@ package org.jenkinsci.plugins.workflow.steps;
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import jenkins.util.Timer;
 
 /**
  * Scoped to a single execution of {@link Step}, and provides insights into what's going on
@@ -24,6 +29,8 @@ import javax.annotation.CheckForNull;
  * @see Step#start(StepContext)
  */
 public abstract class StepExecution implements Serializable {
+
+    private static final Logger LOGGER = Logger.getLogger(StepExecution.class.getName());
     
     @Inject private StepContext context;
 
@@ -95,7 +102,7 @@ public abstract class StepExecution implements Serializable {
 
     @Override public String toString() {
         String supe = super.toString();
-        String status = getStatus();
+        String status = getStatusBounded(10, TimeUnit.MILLISECONDS);
         return status != null ? supe + "(" + status + ")" : supe;
     }
 
@@ -105,9 +112,34 @@ public abstract class StepExecution implements Serializable {
      * It should not be localized as this is intended for use by developers as well as users.
      * May include technical details about Jenkins internals if relevant.
      * @return current status, or null if unimplemented
+     * @see #getStatusBounded
      */
     public @CheckForNull String getStatus() {
         return null;
+    }
+
+    /**
+     * Like {@link #getStatus} but more robust.
+     * Waits a most a given amount of time for the result, and handles {@link RuntimeException}s.
+     * @param timeout maximum amount of time to spend
+     * @param unit time unit
+     */
+    public final @CheckForNull String getStatusBounded(long timeout, TimeUnit unit) {
+        Future<String> task = null;
+        try {
+            task = Timer.get().submit(new Callable<String>() {
+                @Override public String call() throws Exception {
+                    return getStatus();
+                }
+            });
+            return task.get(timeout, unit);
+        } catch (Exception x) { // ExecutionException, RejectedExecutionException, CancellationException, TimeoutException, InterruptedException
+            if (task != null) {
+                task.cancel(true); // in case of TimeoutException especially, we do not want this thread continuing
+            }
+            LOGGER.log(Level.WARNING, "failed to check status of " + super.toString(), x);
+            return x.toString();
+        }
     }
 
     /**
