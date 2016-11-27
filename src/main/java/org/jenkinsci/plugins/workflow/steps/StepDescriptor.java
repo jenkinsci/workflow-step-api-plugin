@@ -31,6 +31,10 @@ import hudson.ExtensionList;
 import hudson.Util;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
+import org.jenkinsci.plugins.structs.describable.DescribableModel;
+import org.jenkinsci.plugins.structs.describable.DescribableParameter;
+
+import javax.annotation.CheckForNull;
 import org.jenkinsci.plugins.structs.SymbolLookup;
 import org.jenkinsci.plugins.structs.describable.DescribableModel;
 import org.jenkinsci.plugins.structs.describable.DescribableParameter;
@@ -49,6 +53,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * {@link Descriptor} that provides information about {@link Step}.
+ *
  * @author Kohsuke Kawaguchi
  * @author Jesse Glick
  */
@@ -237,6 +243,25 @@ public abstract class StepDescriptor extends Descriptor<Step> {
         } else {
             // the default behaviour in the absence of any overrides
             return DescribableModel.uninstantiate2_(step);
+        }
+    }
+
+    /**
+     * Some {@link Step} representation in text (such as Jenkins Pipeline) benefits from
+     * the short hand syntax that omits the explicit argument name when there's only one argument.
+     * This method provides that mechanism in which {@link StepDescriptor} can normalize
+     * such single value into a map that can then be fed into {@link #newInstance(Map)}.
+     *
+     * @return
+     *      map that assigns the name to the sole argument. Otherwise
+     *      null if this step does not support the single argument form.
+     */
+    public @CheckForNull Map<String,Object> singleArgument(Object arg) {
+        DescribableParameter p = new DescribableModel<>(clazz).getSoleRequiredParameter();
+        if (p!=null) {
+            return Collections.singletonMap(p.getName(), arg);
+        } else {
+            return null;
         }
     }
 
