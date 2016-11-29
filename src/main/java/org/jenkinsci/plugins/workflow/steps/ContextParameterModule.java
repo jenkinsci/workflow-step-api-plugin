@@ -53,7 +53,7 @@ class ContextParameterModule extends AbstractModule {
                                 @Override public void injectMembers(I instance) {
                                     if (Modifier.isTransient(f.getModifiers())) {
                                         try {
-                                            Constructor<?> stepCtor = stepType.getConstructor();
+                                            /*Constructor<?> stepCtor = */stepType.getConstructor();
                                             /* TODO does not work
                                             f.setAccessible(true);
                                             f.set(instance, stepCtor.newInstance());
