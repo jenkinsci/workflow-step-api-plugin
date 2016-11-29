@@ -46,7 +46,7 @@ public class AbstractStepImplRestartTest {
 
     @Rule public RestartableJenkinsRule rr = new RestartableJenkinsRule();
 
-    @Ignore("TODO pending investigation")
+    @Ignore("TODO cannot find a way to make it work")
     @Issue("JENKINS-39134")
     @Test public void resume() throws Exception {
         rr.addStep(new Statement() {

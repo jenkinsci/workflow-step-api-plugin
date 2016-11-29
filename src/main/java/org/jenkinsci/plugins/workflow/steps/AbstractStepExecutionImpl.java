@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.workflow.steps;
 
 import com.google.inject.Inject;
 import java.io.Serializable;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * Partial implementation of {@link StepExecution} that injects {@link StepContextParameter} upon resume.
@@ -9,7 +10,9 @@ import java.io.Serializable;
  * <p>The originating {@link Step} may also be {@link Inject}ed.
  * It must be marked {@link Inject#optional}.
  * Normally it is only used for the benefit of {@link #start}, so it should be {@code transient}.
- * If you need any information from the step definition after a restart,
+ * <strong>Beware</strong> that injecting a step this way does not currently work if that step
+ * has a no-argument (“default”) constructor (typically a {@link DataBoundConstructor}).
+ * <p>If you need any information from the step definition after a restart,
  * make sure the {@link Step} is {@link Serializable} and do not mark it {@code transient}.
  * (For a {@link AbstractSynchronousStepExecution} these considerations are irrelevant.)
  * @author Kohsuke Kawaguchi
