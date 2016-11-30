@@ -3,7 +3,6 @@ package org.jenkinsci.plugins.workflow.steps;
 import hudson.Extension;
 import hudson.model.Node;
 import jenkins.model.Jenkins;
-import org.codehaus.groovy.runtime.GStringImpl;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Rule;
@@ -53,20 +52,6 @@ public class AbstractStepImplTest {
 
         BogusStepExecution b = (BogusStepExecution)step.start(c);
         b.start();
-    }
-
-    /**
-     * Regular groovy method call coerces types, and we want to do the same here.
-     */
-    @Test
-    public void coercion() throws Exception {
-        Map r = new HashMap();
-        r.put("a",10L); // long -> int
-        r.put("b",new GStringImpl(new Object[]{1},new String[]{"pre","post"})); // GString -> String
-        BogusStep step = (BogusStep) d.newInstance(r);
-
-        assertEquals(step.a, 10);
-        assertEquals(step.b, "pre1post");
     }
 
     public static class BogusStep extends AbstractStepImpl {
