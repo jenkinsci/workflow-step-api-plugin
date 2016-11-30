@@ -4,27 +4,23 @@ import hudson.model.Executor;
 import hudson.model.Result;
 
 import static hudson.model.Result.ABORTED;
+import javax.annotation.Nonnull;
 
 /**
  * {@link StepExecution} that always executes synchronously. This API should be used for short-lived tasks that
  * return almost instantly.
  *
  * To call legacy Jenkins APIs which are potentially long-running and interruptible yet offer no asynchronous mode
- * (for example because they block on a remoting call) use {@link AbstractSynchronousNonBlockingStepExecution}.
- * Also note that long-lived tasks which do not need to run within a Java method call should use the more general {@link AbstractStepExecutionImpl}
+ * (for example because they block on a remoting call) use {@link SynchronousNonBlockingStepExecution}.
+ * Also note that long-lived tasks which do not need to run within a Java method call should use the more general {@link StepExecution}.
  *
  * @param <T> the type of the return value (may be {@link Void})
  * @author Kohsuke Kawaguchi
- * @deprecated Extend {@link SynchronousStepExecution} and avoid Guice.
  */
-@Deprecated
-public abstract class AbstractSynchronousStepExecution<T> extends AbstractStepExecutionImpl {
+public abstract class SynchronousStepExecution<T> extends StepExecution {
     private transient volatile Thread executing;
 
-    protected AbstractSynchronousStepExecution() {
-    }
-
-    protected AbstractSynchronousStepExecution(StepContext context) {
+    protected SynchronousStepExecution(@Nonnull StepContext context) {
         super(context);
     }
 

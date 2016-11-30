@@ -29,10 +29,10 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestExtension;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.google.inject.Inject;
+import java.util.Collections;
 import static org.junit.Assert.assertTrue;
 
-public class AbstractSynchronousNonBlockingStepExecutionTest {
+public class SynchronousNonBlockingStepExecutionTest {
 
     @Rule public JenkinsRule j = new JenkinsRule();
 
@@ -46,7 +46,7 @@ public class AbstractSynchronousNonBlockingStepExecutionTest {
             "echo 'First message'\n" +
             "syncnonblocking 'wait'\n" +
             "echo 'Second message'\n" +
-        "}"));
+        "}", true));
         WorkflowRun b = p.scheduleBuild2(0).getStartCondition().get();
 
         // Wait for syncnonblocking to be started
@@ -93,7 +93,7 @@ public class AbstractSynchronousNonBlockingStepExecutionTest {
             "echo 'First message'\n" +
             "try { syncnonblocking 'wait' } catch(InterruptedException e) { echo 'Interrupted!' }\n" +
             "echo 'Second message'\n" +
-        "}"));
+        "}", true));
         WorkflowRun b = p.scheduleBuild2(0).getStartCondition().get();
 
         // Wait for syncnonblocking to be started
@@ -117,7 +117,7 @@ public class AbstractSynchronousNonBlockingStepExecutionTest {
             "echo 'First message'\n" +
             "parallel( a: { syncnonblocking 'wait0'; echo 'a branch'; }, b: { semaphore 'wait1'; echo 'b branch'; } )\n" +
             "echo 'Second message'\n" +
-        "}"));
+        "}", true));
         WorkflowRun b = p.scheduleBuild2(0).getStartCondition().get();
 
         SynchronousNonBlockingStep.waitForStart("wait0", b);
@@ -139,7 +139,7 @@ public class AbstractSynchronousNonBlockingStepExecutionTest {
         j.waitForCompletion(b);
     }
 
-    public static final class SynchronousNonBlockingStep extends AbstractStepImpl implements Serializable {
+    public static final class SynchronousNonBlockingStep extends Step implements Serializable {
 
         public static final class State {
             private static final Map<File,State> states = new HashMap<File,State>();
@@ -167,6 +167,11 @@ public class AbstractSynchronousNonBlockingStepExecutionTest {
             return id;
         }
 
+        @Override
+        public StepExecution start(StepContext context) throws Exception {
+            return new StepExecutionImpl(this, context);
+        }
+
         public static void waitForStart(String id, Run<?,?> b) throws IOException, InterruptedException {
             State s = State.get();
             synchronized (s) {
@@ -179,7 +184,7 @@ public class AbstractSynchronousNonBlockingStepExecutionTest {
             }
         }
 
-        public static final void notify(String id) {
+        public static void notify(String id) {
             State s = State.get();
             synchronized (s) {
                 if (s.started.remove(id)) {
@@ -188,19 +193,20 @@ public class AbstractSynchronousNonBlockingStepExecutionTest {
             }
         }
 
-        public static class StepExecutionImpl extends AbstractSynchronousNonBlockingStepExecution<Void> {
+        private static class StepExecutionImpl extends SynchronousNonBlockingStepExecution<Void> {
 
-            @Inject(optional=true) 
-            private transient SynchronousNonBlockingStep step;
+            private transient final SynchronousNonBlockingStep step;
 
-            @StepContextParameter
-            private transient TaskListener listener;
+            StepExecutionImpl(SynchronousNonBlockingStep step, StepContext context) {
+                super(context);
+                this.step = step;
+            }
 
             @Override
             protected Void run() throws Exception {
                 System.out.println("Starting syncnonblocking " + step.getId());
                 // Send a test message to the listener
-                listener.getLogger().println("Test Sync Message");
+                getContext().get(TaskListener.class).getLogger().println("Test Sync Message");
 
                 State s = State.get();
                 synchronized (s) {
@@ -224,11 +230,7 @@ public class AbstractSynchronousNonBlockingStepExecutionTest {
         }
 
         @TestExtension
-        public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
-
-            public DescriptorImpl() {
-                super(StepExecutionImpl.class);
-            }
+        public static final class DescriptorImpl extends StepDescriptor {
 
             @Override
             public String getFunctionName() {
@@ -238,6 +240,11 @@ public class AbstractSynchronousNonBlockingStepExecutionTest {
             @Override
             public String getDisplayName() {
                 return "Sync non-blocking Test step";
+            }
+
+            @Override
+            public Set<? extends Class<?>> getRequiredContext() {
+                return Collections.singleton(TaskListener.class);
             }
 
         }

@@ -9,7 +9,9 @@ import java.util.Set;
 
 /**
  * @author Kohsuke Kawaguchi
+ * @deprecated Directly extend {@link StepDescriptor} and avoid Guice.
  */
+@Deprecated
 public abstract class AbstractStepDescriptorImpl extends StepDescriptor {
     private volatile transient Set<Class<?>> contextTypes;
 

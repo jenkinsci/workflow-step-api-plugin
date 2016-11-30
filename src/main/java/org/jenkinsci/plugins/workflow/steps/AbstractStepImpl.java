@@ -27,7 +27,9 @@ import javax.inject.Inject;
  * injected from {@link StepContext}.
  *
  * @author Kohsuke Kawaguchi
+ * @deprecated Directly extend {@link Step} and avoid Guice.
  */
+@Deprecated
 public abstract class AbstractStepImpl extends Step {
 
     /** Constructs a step execution automatically according to {@link AbstractStepDescriptorImpl#getExecutionType}. */

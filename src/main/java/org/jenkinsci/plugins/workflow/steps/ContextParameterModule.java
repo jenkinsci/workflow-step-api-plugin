@@ -10,7 +10,6 @@ import com.google.inject.spi.TypeListener;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -20,7 +19,9 @@ import java.util.logging.Logger;
 
 /**
  * @author Kohsuke Kawaguchi
+ * @deprecated Guice subsystem is deprecated.
  */
+@Deprecated
 class ContextParameterModule extends AbstractModule {
 
     private static final Logger LOGGER = Logger.getLogger(ContextParameterModule.class.getName());

@@ -2,6 +2,11 @@ package org.jenkinsci.plugins.workflow.steps;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.security.ACL;
+import hudson.util.DaemonThreadFactory;
+import hudson.util.NamingThreadFactory;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import javax.annotation.Nonnull;
 import jenkins.model.Jenkins;
@@ -9,21 +14,18 @@ import jenkins.security.NotReallyRoleSensitiveCallable;
 import org.acegisecurity.Authentication;
 
 /**
- * Similar to {@link AbstractSynchronousStepExecution} (it executes synchronously too) but it does not block the CPS VM thread.
+ * Similar to {@link SynchronousStepExecution} (it executes synchronously too) but it does not block the CPS VM thread.
  * @see StepExecution
  * @param <T> the type of the return value (may be {@link Void})
- * @deprecated Extend {@link SynchronousNonBlockingStepExecution} and avoid Guice.
  */
-@Deprecated
-public abstract class AbstractSynchronousNonBlockingStepExecution<T> extends AbstractStepExecutionImpl {
+public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecution {
 
     private transient volatile Future<?> task;
     private transient String threadName;
 
-    protected AbstractSynchronousNonBlockingStepExecution() {
-    }
+    private static ExecutorService executorService;
 
-    protected AbstractSynchronousNonBlockingStepExecution(StepContext context) {
+    protected SynchronousNonBlockingStepExecution(@Nonnull StepContext context) {
         super(context);
     }
 
@@ -37,14 +39,14 @@ public abstract class AbstractSynchronousNonBlockingStepExecution<T> extends Abs
     @Override
     public final boolean start() throws Exception {
         final Authentication auth = Jenkins.getAuthentication();
-        task = SynchronousNonBlockingStepExecution.getExecutorService().submit(new Runnable() {
+        task = getExecutorService().submit(new Runnable() {
             @SuppressFBWarnings(value="SE_BAD_FIELD", justification="not serializing anything here")
             @Override public void run() {
                 try {
                     getContext().onSuccess(ACL.impersonate(auth, new NotReallyRoleSensitiveCallable<T, Exception>() {
                         @Override public T call() throws Exception {
                             threadName = Thread.currentThread().getName();
-                            return AbstractSynchronousNonBlockingStepExecution.this.run();
+                            return SynchronousNonBlockingStepExecution.this.run();
                         }
                     }));
                 } catch (Exception e) {
@@ -76,6 +78,13 @@ public abstract class AbstractSynchronousNonBlockingStepExecution<T> extends Abs
         } else {
             return "not yet scheduled";
         }
+    }
+
+    static synchronized ExecutorService getExecutorService() {
+        if (executorService == null) {
+            executorService = Executors.newCachedThreadPool(new NamingThreadFactory(new DaemonThreadFactory(), "org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution"));
+        }
+        return executorService;
     }
 
 }
