@@ -60,7 +60,7 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      * (say in freestyle or in workflow).
      * @see StepContext#get(Class)
      */
-    public abstract Set<Class<?>> getRequiredContext();
+    public abstract Set<? extends Class<?>> getRequiredContext();
 
     /**
      * Returns the context {@link Step} adds/sets/modifies when executing a body.
@@ -76,7 +76,7 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      *
      * @see MissingContextVariableException
      */
-    public Set<Class<?>> getProvidedContext() {
+    public Set<? extends Class<?>> getProvidedContext() {
         return Collections.emptySet();
     }
 
