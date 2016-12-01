@@ -37,14 +37,16 @@ public abstract class StepExecution implements Serializable {
     /**
      * Default constructor used by injection.
      * @see AbstractStepImpl#start
+     * @deprecated Avoid Guice.
      */
+    @Deprecated
     protected StepExecution() {
     }
 
     /**
      * If manually created, {@link StepContext} must be passed in.
      */
-    protected StepExecution(StepContext context) {
+    protected StepExecution(@Nonnull StepContext context) {
         this.context = context;
     }
 

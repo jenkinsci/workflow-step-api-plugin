@@ -15,7 +15,9 @@ import java.lang.annotation.Target;
  *
  * @author Kohsuke Kawaguchi
  * @see AbstractStepImpl
+ * @deprecated Call {@link StepContext#get} as needed and avoid Guice.
  */
+@Deprecated
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD,ElementType.FIELD})
 @Documented

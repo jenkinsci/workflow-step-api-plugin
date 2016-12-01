@@ -16,7 +16,9 @@ import org.kohsuke.stapler.DataBoundConstructor;
  * make sure the {@link Step} is {@link Serializable} and do not mark it {@code transient}.
  * (For a {@link AbstractSynchronousStepExecution} these considerations are irrelevant.)
  * @author Kohsuke Kawaguchi
+ * @deprecated Directly extend {@link StepExecution} and avoid Guice.
  */
+@Deprecated
 public abstract class AbstractStepExecutionImpl extends StepExecution {
 
     protected AbstractStepExecutionImpl() {

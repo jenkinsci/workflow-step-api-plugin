@@ -47,7 +47,7 @@ public class MissingContextVariableException extends Exception {
     /**
      * Is type in the given set, in consideration of the subtyping relationship?
      */
-    private boolean isIn(Set<Class<?>> classes) {
+    private boolean isIn(Set<? extends Class<?>> classes) {
         for (Class<?> t : classes)
             if (type.isAssignableFrom(t))
                 return true;
