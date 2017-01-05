@@ -139,7 +139,7 @@ public abstract class StepExecution implements Serializable {
             if (task != null) {
                 task.cancel(true); // in case of TimeoutException especially, we do not want this thread continuing
             }
-            LOGGER.log(Level.WARNING, "failed to check status of " + super.toString(), x);
+            LOGGER.log(Level.FINE, "failed to check status of " + super.toString(), x);
             return x.toString();
         }
     }
