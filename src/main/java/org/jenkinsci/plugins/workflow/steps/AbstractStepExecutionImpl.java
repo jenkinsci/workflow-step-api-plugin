@@ -16,14 +16,23 @@ import org.kohsuke.stapler.DataBoundConstructor;
  * make sure the {@link Step} is {@link Serializable} and do not mark it {@code transient}.
  * (For a {@link AbstractSynchronousStepExecution} these considerations are irrelevant.)
  * @author Kohsuke Kawaguchi
- * @deprecated Directly extend {@link StepExecution} and avoid Guice.
  */
-@Deprecated
 public abstract class AbstractStepExecutionImpl extends StepExecution {
 
+    /**
+     * @deprecated Directly extend {@link StepExecution} and avoid Guice for a new step.
+     * Or see {@link #AbstractStepExecutionImpl(StepContext)} for an existing step.
+     */
+    @Deprecated
     protected AbstractStepExecutionImpl() {
     }
 
+    /**
+     * Constructor for compatibility.
+     * Retain this constructor and override {@link #onResume} (do <strong>not</strong> call the {@code super} implementation)
+     * if your execution historically extended {@link AbstractStepExecutionImpl}, for serial form compatibility.
+     * For new steps, extend {@link StepExecution} directly.
+     */
     protected AbstractStepExecutionImpl(StepContext context) {
         super(context);
     }
@@ -33,11 +42,13 @@ public abstract class AbstractStepExecutionImpl extends StepExecution {
      * Reinject {@link StepContextParameter}s.
      * The {@link Step} will not be reinjected.
      */
+    // Cannot mark this @Deprecated without producing a warning for overriders.
     @Override
     public void onResume() {
         inject();
     }
 
+    @Deprecated
     protected void inject() {
         try {
             AbstractStepImpl.prepareInjector(getContext(), null).injectMembers(this);
