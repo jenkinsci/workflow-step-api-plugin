@@ -102,12 +102,6 @@ public abstract class StepExecution implements Serializable {
      */
     public void onResume() {}
 
-    @Override public String toString() {
-        String supe = super.toString();
-        String status = getStatusBounded(10, TimeUnit.MILLISECONDS);
-        return status != null ? supe + "(" + status + ")" : supe;
-    }
-
     /**
      * May be overridden to provide specific information about what a step is currently doing, for diagnostic purposes.
      * Typical format should be a short, lowercase phrase.
