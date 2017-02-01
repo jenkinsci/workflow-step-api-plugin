@@ -26,6 +26,7 @@ package org.jenkinsci.plugins.workflow.structs;
 
 import hudson.Extension;
 import com.google.common.primitives.Primitives;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Util;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
@@ -562,6 +563,7 @@ public class DescribableHelper {
         return hasArg ? args : null;
     }
 
+    @SuppressFBWarnings(value="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification="new Jenkins.getInstance")
     @SuppressWarnings("unchecked")
     private static Object coerce(String context, Type type, @Nonnull Object o) throws Exception {
         if (type instanceof Class) {
@@ -799,6 +801,7 @@ public class DescribableHelper {
         return clazzes;
     }
 
+    @SuppressFBWarnings(value="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification="new Jenkins.getInstance")
     @SuppressWarnings("rawtypes")
     private static List<? extends Descriptor> getDescriptorList() {
         Jenkins j = Jenkins.getInstance();
