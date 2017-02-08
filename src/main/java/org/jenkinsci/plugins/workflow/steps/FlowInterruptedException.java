@@ -24,13 +24,18 @@
 
 package org.jenkinsci.plugins.workflow.steps;
 
+import com.google.common.collect.Sets;
 import hudson.AbortException;
 import hudson.model.Executor;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import jenkins.model.CauseOfInterruption;
@@ -74,9 +79,16 @@ public final class FlowInterruptedException extends InterruptedException {
      * @param listener
      */
     public void handle(Run<?,?> run, TaskListener listener) {
-        run.addAction(new InterruptedBuildAction(causes));
-        for (CauseOfInterruption cause : causes) {
-            cause.print(listener);
+        Set<CauseOfInterruption> boundCauses = new HashSet<>();
+        for (InterruptedBuildAction a : run.getActions(InterruptedBuildAction.class)) {
+            boundCauses.addAll(a.getCauses());
+        }
+        Collection<CauseOfInterruption> diff = Sets.difference(new LinkedHashSet<>(causes), boundCauses);
+        if (!diff.isEmpty()) {
+            run.addAction(new InterruptedBuildAction(diff));
+            for (CauseOfInterruption cause : diff) {
+                cause.print(listener);
+            }
         }
         print(getCause(), listener);
         for (Throwable t : getSuppressed()) {
