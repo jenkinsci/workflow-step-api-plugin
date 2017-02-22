@@ -22,7 +22,6 @@ Use `StepContext.get` to obtain contextual objects you require;
 commonly required types include `Run`, `TaskListener`, `FilePath`, `EnvVars`, and `Launcher`.
 
 Extend `StepDescriptor`.
-Pass the execution class to the super constructor.
 Besides a display name, pick a function name which will be used from Groovy scripts.
 You will also need to enumerate the types of contextual objects you are treating as required.
 
