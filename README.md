@@ -19,11 +19,11 @@ Parameterize it with the desired return value of the step (or `Void` if it need 
 The `run` method should do the work of the step.
 You can pass the `Step` object to the `StepExecution` constructor to access its configuration.
 Use `StepContext.get` to obtain contextual objects you require;
-commonly required types include `Run`, `TaskListener`, `FilePath`, `EnvVars`, and `Launcher`.
+commonly required types include `Run`, `TaskListener`, `FilePath`, `EnvVars`, and `Launcher`
+(these will be enumerated in `StepDescriptor.getRequiredContext`).
 
 Extend `StepDescriptor`.
 Besides a display name, pick a function name which will be used from Groovy scripts.
-You will also need to enumerate the types of contextual objects you are treating as required.
 
 Create a `config.jelly` form with databinding for all the parameters, for use from _Snippet Generator_.
 You can use the `StepConfigTester` test utility in `workflow-step-api` (`tests` classifier) to verify that all fields are correctly bound.
