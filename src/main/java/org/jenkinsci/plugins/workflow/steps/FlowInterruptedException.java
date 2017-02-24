@@ -26,6 +26,7 @@ package org.jenkinsci.plugins.workflow.steps;
 
 import com.google.common.collect.Sets;
 import hudson.AbortException;
+import hudson.Functions;
 import hudson.model.Executor;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -99,7 +100,7 @@ public final class FlowInterruptedException extends InterruptedException {
         if (t instanceof AbortException) {
             listener.getLogger().println(t.getMessage());
         } else if (t != null) {
-            t.printStackTrace(listener.getLogger());
+            listener.getLogger().println(Functions.printThrowable(t).trim()); // TODO 2.43+ use Functions.printStackTrace
         }
     }
 
