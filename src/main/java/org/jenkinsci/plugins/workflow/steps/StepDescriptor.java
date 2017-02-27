@@ -25,12 +25,17 @@
 package org.jenkinsci.plugins.workflow.steps;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.ExtensionList;
+import hudson.FilePath;
+import hudson.Launcher;
 import hudson.Util;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.structs.SymbolLookup;
 import org.jenkinsci.plugins.structs.describable.DescribableModel;
 import org.jenkinsci.plugins.structs.describable.DescribableParameter;
@@ -54,11 +59,12 @@ import java.util.logging.Logger;
  */
 public abstract class StepDescriptor extends Descriptor<Step> {
     /**
-     * Returns the context {@link Step} needs to access.
-     *
-     * This allows the system to statically infer which steps are applicable in which context
-     * (say in freestyle or in workflow).
-     * @see StepContext#get(Class)
+     * Enumerates any kinds of context the {@link StepExecution} will treat as mandatory.
+     * When {@link StepContext#get} is called, the return value may be null in general;
+     * if your step cannot trivially handle a null value of a given kind, list that type here.
+     * The Pipeline execution engine will then signal a user error before even starting your step if called in an inappropriate context.
+     * For example, a step requesting a {@link Launcher} may only be run inside a {@code node {…}} block.
+     * @return typically an {@link ImmutableSet#of(Object)} with context types like {@link TaskListener} or {@link Run} or {@link FilePath}
      */
     public abstract Set<? extends Class<?>> getRequiredContext();
 
