@@ -48,8 +48,7 @@ import javax.annotation.Nonnull;
 public abstract class BodyInvoker {
     /**
      * Overrides to the context values that are in effect while evaluating the body.
-     * Only allowed values are instances of the predefined types.
-     * <p>Note that for only one instance of a given class can be in context at a time.
+     * <p>Note that only one instance of a given class can be in the context at a time.
      * Thus for certain types, an invoker will generally need to look up any instance in its own enclosing context amd create a proxy/merge:
      * <dl>
      * <dt>{@link EnvVars}<dd>use {@link EnvironmentExpander} instead
@@ -63,10 +62,16 @@ public abstract class BodyInvoker {
      */
     public abstract BodyInvoker withContext(Object override);
 
+    /**
+     * Equivalent to calling {@link withContext} on each object.
+     */
     public BodyInvoker withContexts(Object... overrides) {
         return withContexts(Arrays.asList(overrides));
     }
 
+    /**
+     * Equivalent to calling {@link withContext} on each object.
+     */
     public BodyInvoker withContexts(Collection<?> overrides) {
         for (Object o : overrides)
             withContext(o);

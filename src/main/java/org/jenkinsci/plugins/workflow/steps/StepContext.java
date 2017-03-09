@@ -52,7 +52,7 @@ public abstract class StepContext implements FutureCallback<Object>, Serializabl
 
     /**
      * Tries to find a contextually available object.
-     * Suggested types:
+     * Some types known to be in use:
      * <dl>
      * <dt>{@link Launcher}<dd>a way to fork processes
      * <dt>{@link EnvVars}<dd>read access to environment variables associated with a run, typically used for launchers
@@ -61,7 +61,7 @@ public abstract class StepContext implements FutureCallback<Object>, Serializabl
      * <dt>{@link Executor}<dd>an executor slot on a slave we are running on
      * <dt>{@link TaskListener}<dd>a place to send output (see {@code LogAction} for a flow)
      * <dt>{@link Run}<dd>a running build
-     * <dt>{@code FlowExecution} a running flow
+     * <dt>{@code FlowExecution}<dd> a running flow
      * <dt>{@code FlowNode}<dd>a running node in a flow
      * </dl>
      * @param key the kind of thing we want
@@ -73,6 +73,7 @@ public abstract class StepContext implements FutureCallback<Object>, Serializabl
      *      {@code FlowExecution} could be non-existent (for example, the run that was driving the flow
      *      could have failed to load.) This exception is thrown in such situations just like
      *      {@code FlowExecutionOwner.get} throws IOException.
+     * @see BodyInvoker#withContext
      */
     public abstract @Nullable <T> T get(Class<T> key) throws IOException, InterruptedException;
 
