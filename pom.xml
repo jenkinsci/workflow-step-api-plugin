@@ -34,7 +34,7 @@
     <groupId>org.jenkins-ci.plugins.workflow</groupId>
     <artifactId>workflow-step-api</artifactId>
     <!-- Remove before merge, used to identify specific version for linked PRs, will cut as a beta -->
-    <version>2.10-stepstorage4-beta-SNAPSHOT</version>
+    <version>2.10-stepstorage4-beta</version>
     <packaging>hpi</packaging>
     <name>Pipeline: Step API</name>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Step+API+Plugin</url>
@@ -48,7 +48,7 @@
         <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
-      <tag>HEAD</tag>
+      <tag>workflow-step-api-2.10-stepstorage4-beta</tag>
   </scm>
     <repositories>
         <repository>
