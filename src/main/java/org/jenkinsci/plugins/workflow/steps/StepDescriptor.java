@@ -42,6 +42,7 @@ import org.jenkinsci.plugins.structs.describable.DescribableParameter;
 import org.jenkinsci.plugins.structs.describable.UninstantiatedDescribable;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -305,6 +306,27 @@ public abstract class StepDescriptor extends Descriptor<Step> {
         return r;
     }
 
+    /** Return true if we can easily create a nice String for user display from the object */
+    static boolean isAbleToUseToStringForDisplay(@CheckForNull Object o) {
+        return (o != null && (o instanceof Comparable || o instanceof CharSequence)); // Covers our base types
+    }
+
+    /**
+     * Converts user-supplied step arguments to a string for eventual UI use -- override to handle more than a single trivial argument.
+     * Complements {@link #getDisplayName()} in cases where the step type is less meaningful than its arguments (scripts, for example).
+     * <em>Note: this offers a raw value and does not perform escaping on its own.</em>
+     * @param namedArgs List of parameter name-value pairs supplied to the step to instantiate it, as from {@link #uninstantiate(Step)}
+     * @return Formatted string, before escaping, or null if can't be converted easily to a String.
+     */
+    @Nullable
+    public String argumentsToString(@CheckForNull Map<String, Object> namedArgs) {
+        if (namedArgs != null && namedArgs.size() == 1) {
+            Object val = namedArgs.values().iterator().next();
+            return (isAbleToUseToStringForDisplay(val)) ? val.toString() : null;
+        }
+        // Override me to handle less trivial or more customized cases
+        return null;
+    }
 
     private static final Logger LOGGER = Logger.getLogger(StepDescriptor.class.getName());
 }
