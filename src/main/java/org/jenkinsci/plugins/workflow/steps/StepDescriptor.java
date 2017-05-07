@@ -308,17 +308,19 @@ public abstract class StepDescriptor extends Descriptor<Step> {
 
     /** Return true if we can easily create a nice String for user display from the object */
     static boolean isAbleToUseToStringForDisplay(@CheckForNull Object o) {
-        return (o != null && (o instanceof Comparable || o instanceof CharSequence)); // Covers our base types
+        return o instanceof CharSequence || o instanceof Number || o instanceof Boolean
+                || o instanceof Enum; // Covers our base types, not sure if TimeUnit can do toString
     }
 
     /**
-     * Converts user-supplied step arguments to a string for eventual UI use -- override to handle more than a single trivial argument.
+     * Converts user-supplied step arguments to a string for eventual UI use -- override me to handle more than a single trivial argument.
      * Complements {@link #getDisplayName()} in cases where the step type is less meaningful than its arguments (scripts, for example).
      * <em>Note: this offers a raw value and does not perform escaping on its own.</em>
-     * @param namedArgs List of parameter name-value pairs supplied to the step to instantiate it, as from {@link #uninstantiate(Step)}
+     * @param namedArgs List of parameter name-value pairs supplied to the step to instantiate it, as from {@link #defineArguments(Step)}
+     *                  or supplied to {@link #newInstance(Map)}
      * @return Formatted string, before escaping, or null if can't be converted easily to a String.
      */
-    @Nullable
+    @CheckForNull
     public String argumentsToString(@CheckForNull Map<String, Object> namedArgs) {
         if (namedArgs != null && namedArgs.size() == 1) {
             Object val = namedArgs.values().iterator().next();
