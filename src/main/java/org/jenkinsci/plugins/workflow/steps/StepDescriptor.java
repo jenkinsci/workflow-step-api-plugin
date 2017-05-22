@@ -306,7 +306,7 @@ public abstract class StepDescriptor extends Descriptor<Step> {
         return r;
     }
 
-    /** Return true if we can easily create a nice String for user display from the object */
+    /** Return true if we can easily create a nice String for user display from the object by invoking o.toString*/
     static boolean isAbleToUseToStringForDisplay(@CheckForNull Object o) {
         return o instanceof CharSequence || o instanceof Number || o instanceof Boolean
                 || o instanceof Enum; // Covers our base types, not sure if TimeUnit can do toString
