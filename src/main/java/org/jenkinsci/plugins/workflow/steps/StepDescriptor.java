@@ -42,6 +42,7 @@ import org.jenkinsci.plugins.structs.describable.DescribableParameter;
 import org.jenkinsci.plugins.structs.describable.UninstantiatedDescribable;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -305,6 +306,29 @@ public abstract class StepDescriptor extends Descriptor<Step> {
         return r;
     }
 
+    /** Return true if we can easily create a nice String for user display from the object by invoking o.toString*/
+    static boolean isAbleToUseToStringForDisplay(@CheckForNull Object o) {
+        return o instanceof CharSequence || o instanceof Number || o instanceof Boolean
+                || o instanceof Enum; // Covers our base types, not sure if TimeUnit can do toString
+    }
+
+    /**
+     * Converts user-supplied step arguments to a string for eventual UI use -- override me to handle more than a single trivial argument.
+     * Complements {@link #getDisplayName()} in cases where the step type is less meaningful than its arguments (scripts, for example).
+     * <em>Note: this offers a raw value and does not perform escaping on its own.</em>
+     * @param namedArgs List of parameter name-value pairs supplied to the step to instantiate it, as from {@link #defineArguments(Step)}
+     *                  or supplied to {@link #newInstance(Map)}
+     * @return Formatted string, before escaping, or null if can't be converted easily to a String.
+     */
+    @CheckForNull
+    public String argumentsToString(@CheckForNull Map<String, Object> namedArgs) {
+        if (namedArgs != null && namedArgs.size() == 1) {
+            Object val = namedArgs.values().iterator().next();
+            return (isAbleToUseToStringForDisplay(val)) ? val.toString() : null;
+        }
+        // Override me to handle less trivial or more customized cases
+        return null;
+    }
 
     private static final Logger LOGGER = Logger.getLogger(StepDescriptor.class.getName());
 }
