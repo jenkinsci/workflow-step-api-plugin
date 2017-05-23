@@ -29,6 +29,7 @@ import hudson.model.Computer;
 import hudson.model.Run;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
@@ -43,6 +44,29 @@ public abstract class EnvironmentExpander implements Serializable {
      * @param env an original set of environment variables
      */
     public abstract void expand(@Nonnull EnvVars env) throws IOException, InterruptedException;
+
+    /**
+     * Provides an expander for a constant map of string keys and string values.
+     *
+     * @param env A non-null map of string keys and string values.
+     * @return An expander which will provide the given map.
+     */
+    public static EnvironmentExpander constant(@Nonnull Map<String,String> env) {
+        return new ConstantEnvironmentExpander(env);
+    }
+
+    private static class ConstantEnvironmentExpander extends EnvironmentExpander {
+        private static final long serialVersionUID = 1;
+        private final @Nonnull Map<String,String> envMap;
+
+        ConstantEnvironmentExpander(@Nonnull Map<String,String> envMap) {
+            this.envMap = envMap;
+        }
+
+        @Override public void expand(EnvVars env) throws IOException, InterruptedException {
+            env.overrideAll(envMap);
+        }
+    }
 
     /**
      * Merge together two expanders.
