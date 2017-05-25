@@ -15,7 +15,6 @@ import java.util.Set;
 public abstract class AbstractStepDescriptorImpl extends StepDescriptor {
     private volatile transient Set<Class<?>> contextTypes;
 
-    // TODO should this be required to be AbstractStepExecutionImpl?
     private final Class<? extends StepExecution> executionType;
 
     /**
@@ -36,7 +35,7 @@ public abstract class AbstractStepDescriptorImpl extends StepDescriptor {
     @Override
     public final Set<Class<?>> getRequiredContext() {
         if (contextTypes==null) {
-            Set<Class<?>> r = new HashSet<Class<?>>();
+            Set<Class<?>> r = new HashSet<>();
 
             for (Class<?> c = executionType; c!=null; c=c.getSuperclass()) {
                 for (Field f : c.getDeclaredFields()) {

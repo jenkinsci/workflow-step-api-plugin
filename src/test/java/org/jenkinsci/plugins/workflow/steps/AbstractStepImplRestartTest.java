@@ -46,7 +46,7 @@ public class AbstractStepImplRestartTest {
 
     @Rule public RestartableJenkinsRule rr = new RestartableJenkinsRule();
 
-    @Ignore("TODO cannot find a way to make it work")
+    @Ignore("cannot find a way to make it work")
     @Issue("JENKINS-39134")
     @Test public void resume() throws Exception {
         rr.addStep(new Statement() {
@@ -68,6 +68,7 @@ public class AbstractStepImplRestartTest {
             }
         });
     }
+    @SuppressWarnings("deprecation") // that is the whole point
     public static class BlockStep extends AbstractStepImpl {
         @DataBoundConstructor public BlockStep() {}
         public static class Execution extends AbstractStepExecutionImpl {

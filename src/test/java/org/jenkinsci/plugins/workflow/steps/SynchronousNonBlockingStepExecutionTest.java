@@ -57,8 +57,7 @@ public class SynchronousNonBlockingStepExecutionTest {
         // Check for FlowNode created
         FlowGraphWalker walker = new FlowGraphWalker(b.getExecution());
         boolean found = false;
-        // TODO: use iterator when https://github.com/jenkinsci/workflow-plugin/pull/178 merged
-        for (FlowNode n = walker.next(); n != null; n = walker.next()) {
+        for (FlowNode n : walker) {
             if (n instanceof StepNode && ((StepNode) n).getDescriptor() instanceof SynchronousNonBlockingStep.DescriptorImpl) {
                 found = true;
                 break;
@@ -153,10 +152,10 @@ public class SynchronousNonBlockingStepExecutionTest {
                 return state;
             }
             private State() {}
-            final Set<String> started = new HashSet<String>();
+            final Set<String> started = new HashSet<>();
         }
 
-        private String id;
+        private final String id;
 
         @DataBoundConstructor
         public SynchronousNonBlockingStep(String id) {
