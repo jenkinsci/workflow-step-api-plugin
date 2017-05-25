@@ -20,6 +20,7 @@ import static org.mockito.Mockito.*;
 /**
  * @author Kohsuke Kawaguchi
  */
+@SuppressWarnings("deprecation") // it is all deprecated
 public class AbstractStepImplTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
@@ -35,7 +36,7 @@ public class AbstractStepImplTest {
     @Test
     public void inject() throws Exception {
 
-        Map r = new HashMap();
+        Map<String, Object> r = new HashMap<>();
         r.put("a",3);
         r.put("b","bbb");
         r.put("c",null);

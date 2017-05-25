@@ -55,7 +55,7 @@ class ContextParameterModule extends AbstractModule {
                                     if (Modifier.isTransient(f.getModifiers())) {
                                         try {
                                             /*Constructor<?> stepCtor = */stepType.getConstructor();
-                                            /* TODO does not work
+                                            /* does not work
                                             f.setAccessible(true);
                                             f.set(instance, stepCtor.newInstance());
                                             */
