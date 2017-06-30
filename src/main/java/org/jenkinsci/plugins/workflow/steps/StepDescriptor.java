@@ -321,8 +321,8 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      * @return Formatted string, before escaping, or null if can't be converted easily to a String.
      */
     @CheckForNull
-    public String argumentsToString(@CheckForNull Map<String, Object> namedArgs) {
-        if (namedArgs != null && namedArgs.size() == 1) {
+    public String argumentsToString(@Nonnull Map<String, Object> namedArgs) {
+        if (namedArgs.size() == 1) {
             Object val = namedArgs.values().iterator().next();
             return (isAbleToUseToStringForDisplay(val)) ? val.toString() : null;
         }
