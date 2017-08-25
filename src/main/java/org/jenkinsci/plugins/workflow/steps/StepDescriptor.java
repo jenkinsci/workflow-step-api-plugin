@@ -96,6 +96,21 @@ public abstract class StepDescriptor extends Descriptor<Step> {
     public abstract String getFunctionName();
 
     /**
+     *  Test if we can defer persisting state around this {@link Step} for efficiency.
+     *
+     *  <p><strong>Common uses:</strong>
+     *  <ul>
+     *      <li>Where the {@link StepExecution} adds multiple actions, defer persisting until done.</li>
+     *      <li>If we can simple run the Step again</li>
+     *  </ul>
+     *
+     *  @return True if we shouldn't write out state around this step until explicitly forced to.
+     */
+    public boolean deferWritingState() {
+        return false;
+    }
+
+    /**
      * Return true if this step can accept an implicit block argument.
      * (If it can, but it is called without a block, {@link StepContext#hasBody} will be false.)
      * @see StepContext#newBodyInvoker()
