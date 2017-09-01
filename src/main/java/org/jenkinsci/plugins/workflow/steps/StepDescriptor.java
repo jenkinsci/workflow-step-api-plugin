@@ -96,17 +96,14 @@ public abstract class StepDescriptor extends Descriptor<Step> {
     public abstract String getFunctionName();
 
     /**
-     *  Test if we can defer persisting state around this {@link Step} for efficiency.
+     *  If true, we shouldn't write out the FlowNode or its actions until this step's {@link StepExecution} explicitly
+     *  re-enables persistence.
      *
-     *  <p><strong>Common uses:</strong>
-     *  <ul>
-     *      <li>Where the {@link StepExecution} adds multiple actions, defer persisting until done.</li>
-     *      <li>If we can simple run the Step again</li>
-     *  </ul>
-     *
-     *  @return True if we shouldn't write out state around this step until explicitly forced to.
+     *  This allows Steps that attach {@link hudson.model.Action}s to complete that before writing out the data,
+     *  avoiding redundant write-rewrite cycles and greatly boosting performance when running this {@link Step}
+     *  @return True if we shouldn't write out the FlowNode or its Actions around this step until explicitly forced to.
      */
-    public boolean deferWritingState() {
+    public boolean delayWritingFlownodeActions() {
         return false;
     }
 
