@@ -77,7 +77,6 @@ public class AbstractStepImplRestartTest {
                 getContext().newBodyInvoker().withCallback(BodyExecutionCallback.wrap(getContext())).start();
                 return false;
             }
-            @Override public void stop(Throwable cause) throws Exception {}
         }
         @TestExtension("resume") public static class DescriptorImpl extends AbstractStepDescriptorImpl {
             public DescriptorImpl() {super(Execution.class);}

@@ -78,23 +78,32 @@ public abstract class StepExecution implements Serializable {
 
     /**
      * May be called if someone asks a running step to abort.
-     *
+     * <p>
      * Just like {@link Thread#interrupt()},
      * the step might not honor the request immediately.
      * Multiple stop requests might be sent.
      * It is always responsible for calling {@link StepContext#onSuccess(Object)} or (more likely)
      * {@link StepContext#onFailure(Throwable)} eventually,
      * whether or not it was asked to stop.
-     *
      * <p>
-     * In the workflow context, this method is meant to be used by {@code FlowExecution}, and not
-     * to be called willy-nilly from UI or other human requests to pause. Use {@link BodyExecution#cancel(Throwable)}.
+     * The default behavior is to call {@link StepContext#onFailure} immediately.
+     * This may be overridden by non-block-scoped steps which wish to halt some processing prior to failing the step,
+     * or even to send a cancellation signal to some process but leave the step running until that is handled gracefully.
+     * Block-scoped steps which merely call their bodies generally need not override this method,
+     * as the interrupt will be sent to the step(s) actually running at the time
+     * (so no special call to {@link BodyExecution#cancel(Throwable)} is needed),
+     * though an override may be necessary if it is possible for there to be no body currently running.
+     * <p>
+     * This method is meant to be used by {@code FlowExecution}, not called from UI or other human requests to pause.
+     * Use {@link BodyExecution#cancel(Throwable)} for programmatic cancellation of bodies.
      *
      * @param cause
      *      Contextual information that lets the step know what resulted in stopping an executing step,
      *      passed in the hope that this will assist diagnostics.
      */
-    public abstract void stop(@Nonnull Throwable cause) throws Exception;
+    public void stop(@Nonnull Throwable cause) throws Exception {
+        getContext().onFailure(cause);
+    }
 
     /**
      * Called when {@link StepExecution} is brought back into memory after restart.
