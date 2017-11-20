@@ -273,20 +273,19 @@ public abstract class StepDescriptor extends Descriptor<Step> {
             @SuppressFBWarnings(value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification="all() will not return nulls")
             @Override
             public boolean apply(StepDescriptor i) {
-                if (i.isMetaStep()) {
-                    Class<?> a = i.getMetaStepArgumentType();
-                    if (a != null) {
-                        if (!a.equals(Object.class)) {
-                            return true;
-                        } else {
-                            LOGGER.log(Level.WARNING,
-                                    "{0} claims to be a meta-step but has {1} as the parameter in @DataBoundConstructor",
-                                    new Object[]{i.getClass().getName(), a.getName()});
-
-                        }
+                Class<?> a = i.getMetaStepArgumentType();
+                if (a != null) {
+                    if (a.equals(Object.class) || a.equals(Void.TYPE)) {
+                        LOGGER.log(Level.WARNING,
+                                "{0} claims to be a meta-step but has {1} as the parameter in @DataBoundConstructor",
+                                new Object[]{i.getClass().getName(), a.getName()});
+                        return false;
+                    } else {
+                        return true;
                     }
+                } else {
+                    return false;
                 }
-                return false;
             }
         });
     }
