@@ -276,12 +276,12 @@ public abstract class StepDescriptor extends Descriptor<Step> {
                 if (i.isMetaStep()) {
                     Class<?> a = i.getMetaStepArgumentType();
                     if (a != null) {
-                        if (Describable.class.isAssignableFrom(a)) {
+                        if (!a.equals(Object.class)) {
                             return true;
                         } else {
                             LOGGER.log(Level.WARNING,
-                                    "{0} claims to be a meta-step but has {1} instead of a Describable as the parameter in @DataBoundConstructor",
-                                    new Object[]{getClass().getName(), a.getName()});
+                                    "{0} claims to be a meta-step but has {1} as the parameter in @DataBoundConstructor",
+                                    new Object[]{i.getClass().getName(), a.getName()});
 
                         }
                     }
