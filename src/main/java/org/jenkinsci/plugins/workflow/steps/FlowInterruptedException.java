@@ -41,6 +41,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import jenkins.model.CauseOfInterruption;
 import jenkins.model.InterruptedBuildAction;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 
 /**
  * Special exception that can be thrown out of {@link StepContext#onFailure} to indicate that the flow was aborted from the inside.
@@ -66,10 +67,12 @@ public final class FlowInterruptedException extends InterruptedException {
         this.causes = Arrays.asList(causes);
     }
 
+    @Whitelisted
     public @Nonnull Result getResult() {
         return result;
     }
 
+    @Whitelisted
     public @Nonnull List<CauseOfInterruption> getCauses() {
         return causes;
     }
