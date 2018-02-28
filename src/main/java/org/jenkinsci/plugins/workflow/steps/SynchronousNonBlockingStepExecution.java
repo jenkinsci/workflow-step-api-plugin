@@ -49,7 +49,7 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
                             return SynchronousNonBlockingStepExecution.this.run();
                         }
                     }));
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     getContext().onFailure(e);
                 }
             }
