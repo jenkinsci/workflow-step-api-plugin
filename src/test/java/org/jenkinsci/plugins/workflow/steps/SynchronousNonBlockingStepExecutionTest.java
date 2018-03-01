@@ -251,4 +251,33 @@ public class SynchronousNonBlockingStepExecutionTest {
         private static final long serialVersionUID = 1L;
 
     }
+
+    @Test public void errors() throws Exception {
+        WorkflowJob p = j.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition("erroneous()", true));
+        j.assertLogContains("ought to fail", j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0)));
+    }
+    public static final class Erroneous extends Step {
+        @DataBoundConstructor public Erroneous() {}
+        @Override public StepExecution start(StepContext context) throws Exception {
+            return new Exec(context);
+        }
+        private static final class Exec extends SynchronousNonBlockingStepExecution<Void> {
+            Exec(StepContext context) {
+                super(context);
+            }
+            @Override protected Void run() throws Exception {
+                throw new AssertionError("ought to fail");
+            }
+        }
+        @TestExtension("errors") public static final class DescriptorImpl extends StepDescriptor {
+            @Override public Set<? extends Class<?>> getRequiredContext() {
+                return Collections.emptySet();
+            }
+            @Override public String getFunctionName() {
+                return "erroneous";
+            }
+        }
+    }
+
 }
