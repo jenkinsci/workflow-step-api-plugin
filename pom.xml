@@ -28,12 +28,12 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>2.33</version>
+        <version>3.12</version>
         <relativePath />
     </parent>
     <groupId>org.jenkins-ci.plugins.workflow</groupId>
     <artifactId>workflow-step-api</artifactId>
-    <version>2.15-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
     <packaging>hpi</packaging>
     <name>Pipeline: Step API</name>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Step+API+Plugin</url>
@@ -47,8 +47,8 @@
         <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>${scmTag}</tag>
+    </scm>
     <repositories>
         <repository>
             <id>repo.jenkins-ci.org</id>
@@ -62,7 +62,10 @@
         </pluginRepository>
     </pluginRepositories>
     <properties>
+        <revision>2.15</revision>
+        <changelist>-SNAPSHOT</changelist>
         <jenkins.version>1.642.3</jenkins.version>
+        <java.level>7</java.level>
         <no-test-jar>false</no-test-jar>
     </properties>
     <dependencies>
