@@ -33,7 +33,7 @@
     </parent>
     <groupId>org.jenkins-ci.plugins.workflow</groupId>
     <artifactId>workflow-step-api</artifactId>
-    <version>2.16-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
     <packaging>hpi</packaging>
     <name>Pipeline: Step API</name>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Step+API+Plugin</url>
@@ -62,7 +62,7 @@
         </pluginRepository>
     </pluginRepositories>
     <properties>
-        <revision>2.15</revision>
+        <revision>2.16</revision>
         <changelist>-SNAPSHOT</changelist>
         <jenkins.version>1.642.3</jenkins.version>
         <java.level>7</java.level>
