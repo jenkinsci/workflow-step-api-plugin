@@ -25,8 +25,10 @@
 package org.jenkinsci.plugins.workflow.steps;
 
 import hudson.EnvVars;
+import hudson.ExtensionList;
 import hudson.model.Computer;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -97,10 +99,19 @@ public abstract class EnvironmentExpander implements Serializable {
     }
 
     /**
+     * @deprecated Use {@link #getEffectiveEnvironment(EnvVars, EnvVars, EnvironmentExpander, StepContext, TaskListener)} to allow {@link StepEnvironmentContributor}s to run.
+     */
+    @Deprecated
+    public static @Nonnull EnvVars getEffectiveEnvironment(@Nonnull EnvVars customEnvironment, @CheckForNull EnvVars contextualEnvironment, @CheckForNull EnvironmentExpander expander) throws IOException, InterruptedException {
+        return getEffectiveEnvironment(customEnvironment, contextualEnvironment, expander, null, TaskListener.NULL);
+    }
+
+    /**
      * Computes an effective environment in a given context.
      * Used from {@code DefaultStepContext} and {@code EnvActionImpl}.
      * The precedence order is:
      * <ol>
+     * <li>{@link StepEnvironmentContributor}s (if any)
      * <li>{@code expander} (if any)
      * <li>{@code customEnvironment}
      * <li>{@code contextualEnvironment} (if any)
@@ -108,9 +119,11 @@ public abstract class EnvironmentExpander implements Serializable {
      * @param customEnvironment {@link Run#getEnvironment(TaskListener)}, or {@code EnvironmentAction#getEnvironment}
      * @param contextualEnvironment a possible override as per {@link BodyInvoker#withContext} (such as from {@link Computer#getEnvironment} called from {@code PlaceholderExecutable})
      * @param expander a possible expander
+     * @param stepContext the context of the step being executed
+     * @param listener Connected to the build console. Can be used to report errors.
      * @return the effective environment
      */
-    public static @Nonnull EnvVars getEffectiveEnvironment(@Nonnull EnvVars customEnvironment, @CheckForNull EnvVars contextualEnvironment, @CheckForNull EnvironmentExpander expander) throws IOException, InterruptedException {
+    public static @Nonnull EnvVars getEffectiveEnvironment(@Nonnull EnvVars customEnvironment, @CheckForNull EnvVars contextualEnvironment, @CheckForNull EnvironmentExpander expander, @CheckForNull StepContext stepContext, @Nonnull TaskListener listener) throws IOException, InterruptedException {
         EnvVars env;
         if (contextualEnvironment != null) {
             env = new EnvVars(contextualEnvironment);
@@ -120,6 +133,12 @@ public abstract class EnvironmentExpander implements Serializable {
         }
         if (expander != null) {
             expander.expand(env);
+        }
+        if (stepContext != null) {
+            // apply them in a reverse order so that higher ordinal ones can modify values added by lower ordinal ones
+            for (StepEnvironmentContributor contributor: ExtensionList.lookup(StepEnvironmentContributor.class).reverseView()) {
+                contributor.buildEnvironmentFor(stepContext, env, listener);
+            }
         }
         return env;
     }
