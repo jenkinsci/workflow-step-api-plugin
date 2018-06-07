@@ -22,6 +22,7 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
 
     private transient volatile Future<?> task;
     private transient String threadName;
+    private transient boolean stopping;
 
     private static ExecutorService executorService;
 
@@ -50,7 +51,9 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
                         }
                     }));
                 } catch (Throwable e) {
-                    getContext().onFailure(e);
+                    if (!stopping) {
+                        getContext().onFailure(e);
+                    }
                 }
             }
         });
@@ -63,8 +66,10 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
     @Override
     public void stop(Throwable cause) throws Exception {
         if (task != null) {
+            stopping = true;
             task.cancel(true);
         }
+        super.stop(cause);
     }
 
     @Override

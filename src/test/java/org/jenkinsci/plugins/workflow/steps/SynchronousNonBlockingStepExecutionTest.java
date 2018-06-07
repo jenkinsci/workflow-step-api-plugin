@@ -107,6 +107,10 @@ public class SynchronousNonBlockingStepExecutionTest {
         j.waitForMessage("Interrupted!", b);
         j.waitForCompletion(b);
         j.assertBuildStatus(Result.ABORTED, b);
+
+        // Also check that timeouts produce the right status.
+        p.setDefinition(new CpsFlowDefinition("timeout(time: 1, unit: 'SECONDS') {syncnonblocking 'wait2'}", true));
+        j.assertLogContains(new TimeoutStepExecution.ExceededTimeout().getShortDescription(), j.assertBuildStatus(Result.ABORTED, p.scheduleBuild2(0)));
     }
 
     @Test
