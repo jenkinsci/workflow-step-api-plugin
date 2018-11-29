@@ -310,7 +310,7 @@ public abstract class StepDescriptor extends Descriptor<Step> {
         List<StepDescriptor> r = new ArrayList<>();
         // honor ordinals among meta-steps
         for (StepDescriptor d : StepDescriptor.allMeta()) {
-            Class<?> a = d.getMetaStepArgumentType();
+            Class a = d.getMetaStepArgumentType();
             if (a==null)    continue;   // defensive check
             if (SymbolLookup.get().findDescriptor(a,symbol)!=null)
                 r.add(d);
