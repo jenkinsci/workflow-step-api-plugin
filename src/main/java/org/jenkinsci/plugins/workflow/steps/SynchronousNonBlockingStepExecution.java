@@ -8,6 +8,7 @@ import hudson.util.NamingThreadFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import javax.annotation.Nonnull;
 import jenkins.model.Jenkins;
 import jenkins.security.NotReallyRoleSensitiveCallable;
@@ -87,9 +88,22 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
 
     static synchronized ExecutorService getExecutorService() {
         if (executorService == null) {
-            executorService = Executors.newCachedThreadPool(new NamingThreadFactory(new DaemonThreadFactory(), "org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution"));
+            executorService = Executors.newCachedThreadPool(new NamingThreadFactory(new ClassLoaderSanityThreadFactory(new DaemonThreadFactory()), "org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution"));
         }
         return executorService;
+    }
+
+    // TODO: When core baseline is 2.105+ delete and replace with hudson.util.ClassLoaderSanityThreadFactory.
+    private static class ClassLoaderSanityThreadFactory implements ThreadFactory {
+        private final ThreadFactory delegate;
+        public ClassLoaderSanityThreadFactory(ThreadFactory delegate) {
+            this.delegate = delegate;
+        }
+        public Thread newThread(Runnable r) {
+            Thread t = delegate.newThread(r);
+            t.setContextClassLoader(ClassLoaderSanityThreadFactory.class.getClassLoader());
+            return t;
+        }
     }
 
 }
