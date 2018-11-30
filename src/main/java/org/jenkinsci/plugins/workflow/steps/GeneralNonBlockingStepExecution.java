@@ -26,7 +26,6 @@ package org.jenkinsci.plugins.workflow.steps;
 
 import hudson.security.ACL;
 import hudson.security.ACLContext;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import javax.annotation.Nonnull;
 import jenkins.model.Jenkins;
@@ -38,6 +37,8 @@ import org.acegisecurity.Authentication;
  */
 public abstract class GeneralNonBlockingStepExecution extends StepExecution {
 
+    private static final long serialVersionUID = 1L;
+
     private transient volatile Future<?> task;
     private String threadName;
     private transient boolean stopping;
@@ -46,13 +47,18 @@ public abstract class GeneralNonBlockingStepExecution extends StepExecution {
         super(context);
     }
 
+    @FunctionalInterface
+    protected interface Block {
+        void run() throws Exception;
+    }
+
     /**
      * Initiate background work that should not block the CPS VM thread.
      * Call this from a CPS VM thread, such as from {@link #start} or {@link BodyExecutionCallback#onSuccess}.
      * The block may finish by calling {@link BodyInvoker#start}, {@link StepContext#onSuccess}, etc.
      * @param block some code to run in a utility thread
      */
-    protected final void run(Callable<Void> block) {
+    protected final void run(Block block) {
         if (stopping) {
             return;
         }
@@ -61,7 +67,7 @@ public abstract class GeneralNonBlockingStepExecution extends StepExecution {
             threadName = Thread.currentThread().getName();
             try {
                 try (ACLContext acl = ACL.as(auth)) {
-                    block.call();
+                    block.run();
                 }
             } catch (Throwable e) {
                 if (!stopping) {
@@ -99,6 +105,45 @@ public abstract class GeneralNonBlockingStepExecution extends StepExecution {
         } else {
             return "not currently scheduled, or running blocks";
         }
+    }
+
+    /**
+     * Variant of {@link BodyExecutionCallback.TailCall} which wraps {@link #finished} in {@link #run}.
+     */
+    protected abstract class TailCall extends BodyExecutionCallback {
+
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * Called when the body is finished.
+         * @param context the body context as passed to {@link #onSuccess} or {@link #onFailure}
+         * @throws Exception if anything is thrown here, the step fails too
+         */
+        protected abstract void finished(StepContext context) throws Exception;
+
+        @Override public final void onSuccess(StepContext context, Object result) {
+            run(() -> {
+                try {
+                    finished(context);
+                } catch (Exception x) {
+                    context.onFailure(x);
+                    return;
+                }
+                context.onSuccess(result);
+            });
+        }
+
+        @Override public final void onFailure(StepContext context, Throwable t) {
+            run(() -> {
+                try {
+                    finished(context);
+                } catch (Exception x) {
+                    t.addSuppressed(x);
+                }
+                context.onFailure(t);
+            });
+        }
+
     }
 
 }
