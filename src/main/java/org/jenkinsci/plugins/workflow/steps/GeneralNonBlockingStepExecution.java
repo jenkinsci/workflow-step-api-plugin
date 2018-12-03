@@ -26,6 +26,7 @@ package org.jenkinsci.plugins.workflow.steps;
 
 import hudson.security.ACL;
 import hudson.security.ACLContext;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import javax.annotation.Nonnull;
 import jenkins.model.Jenkins;
@@ -33,7 +34,8 @@ import org.acegisecurity.Authentication;
 
 /**
  * Generalization of {@link SynchronousNonBlockingStepExecution} that can be used for block-scoped steps.
- * The step may at any given time be running either CPS VM code, background code, or waiting for events (for example running a block).
+ * The step may at any given time either be running CPS VM code, running background code,
+ * or waiting for events (for example running a block).
  */
 public abstract class GeneralNonBlockingStepExecution extends StepExecution {
 
@@ -47,6 +49,11 @@ public abstract class GeneralNonBlockingStepExecution extends StepExecution {
         super(context);
     }
 
+    /**
+     * Block to be passed to {@link #run}.
+     * like {@link Callable}{@code <}{@link Void}{@code >}, may throw an exception;
+     * yet like {@link Runnable}, it need not {@code return null;} at the end.
+     */
     @FunctionalInterface
     protected interface Block {
         void run() throws Exception;
