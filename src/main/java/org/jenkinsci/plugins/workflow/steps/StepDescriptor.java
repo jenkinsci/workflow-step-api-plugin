@@ -99,6 +99,7 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      * Return true if this step can accept an implicit block argument.
      * (If it can, but it is called without a block, {@link StepContext#hasBody} will be false.)
      * @see StepContext#newBodyInvoker()
+     * @see GeneralNonBlockingStepExecution
      */
     public boolean takesImplicitBlockArgument() {
         return false;

@@ -33,7 +33,7 @@ import jenkins.model.Jenkins;
 import org.acegisecurity.Authentication;
 
 /**
- * Generalization of {@link SynchronousNonBlockingStepExecution} that can be used for block-scoped steps.
+ * Generalization of {@link SynchronousNonBlockingStepExecution} that can be used for {@linkplain StepDescriptor#takesImplicitBlockArgument block-scoped steps}.
  * The step may at any given time either be running CPS VM code, running background code,
  * or waiting for events (for example running a block).
  */
