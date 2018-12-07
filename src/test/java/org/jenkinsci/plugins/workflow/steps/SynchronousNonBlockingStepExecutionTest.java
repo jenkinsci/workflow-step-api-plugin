@@ -25,6 +25,7 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.BuildWatcher;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestExtension;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -284,4 +285,39 @@ public class SynchronousNonBlockingStepExecutionTest {
         }
     }
 
+    @Issue("JENKINS-53305")
+    @Test public void contextClassLoader() throws Exception {
+        WorkflowJob p = j.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition("" +
+                // Sets the class loader used to invoke steps to null to demonstrate a potential problem.
+                // I am not sure how this could occur in practice, so this is a very artificial reproduction.
+                "org.jenkinsci.plugins.workflow.cps.CpsVmExecutorService.ORIGINAL_CONTEXT_CLASS_LOADER.set(null)\n" +
+                "checkClassLoader()\n", false));
+        j.assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0));
+    }
+    public static final class CheckClassLoader extends Step {
+        @DataBoundConstructor public CheckClassLoader() {}
+        @Override public StepExecution start(StepContext context) throws Exception {
+            return new Exec(context);
+        }
+        private static final class Exec extends SynchronousNonBlockingStepExecution<Void> {
+            Exec(StepContext context) {
+                super(context);
+            }
+            @Override protected Void run() throws Exception {
+                if (Thread.currentThread().getContextClassLoader() == null) {
+                    throw new AssertionError("Context class loader should not be null!");
+                }
+                return null;
+            }
+        }
+        @TestExtension("contextClassLoader") public static final class DescriptorImpl extends StepDescriptor {
+            @Override public Set<? extends Class<?>> getRequiredContext() {
+                return Collections.emptySet();
+            }
+            @Override public String getFunctionName() {
+                return "checkClassLoader";
+            }
+        }
+    }
 }
