@@ -25,15 +25,40 @@
 package org.jenkinsci.plugins.workflow.steps;
 
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.TestExtension;
+import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Tests some specific {@link StepDescriptor} APIs
  */
 public class StepDescriptorTest {
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
+
+    @Inject
+    private StepA.DescriptorImpl descriptorA;
+
+    @Inject
+    private StepB.DescriptorImpl descriptorB;
+
+    @Before
+    public void setUp() {
+        j.getInstance().getInjector().injectMembers(this);
+    }
 
     @Test
     public void testStringFormattingAllowed() {
@@ -44,5 +69,90 @@ public class StepDescriptorTest {
         Assert.assertTrue(StepDescriptor.isAbleToUseToStringForDisplay(Boolean.FALSE));
         Assert.assertTrue(StepDescriptor.isAbleToUseToStringForDisplay(TimeUnit.MINUTES));
         Assert.assertTrue(StepDescriptor.isAbleToUseToStringForDisplay(new StringBuffer("gopher")));
+    }
+
+    @Test
+    public void testGetExecutionType() {
+        Assert.assertEquals(descriptorA.getExecutionType(), StepA.StepExecutionImpl.class);
+        Assert.assertEquals(descriptorB.getExecutionType(), StepB.StepExecutionImpl.class);
+    }
+
+    @Test
+    public void testGetResultType() {
+        Assert.assertEquals(descriptorA.getResultType(), String.class);
+        Type resultTypeB = descriptorB.getResultType();
+        Assert.assertTrue(resultTypeB instanceof ParameterizedType);
+        Assert.assertEquals(((ParameterizedType)resultTypeB).getRawType(), List.class);
+        Assert.assertArrayEquals(((ParameterizedType)resultTypeB).getActualTypeArguments(), new Type[] { Integer.class });
+    }
+
+    public static final class StepA extends Step {
+        @DataBoundConstructor
+        public StepA() {
+        }
+
+        @Override
+        public StepExecutionImpl start(StepContext context) throws Exception {
+            return new StepExecutionImpl(context);
+        }
+
+        private static final class StepExecutionImpl extends StepExecution {
+            StepExecutionImpl(@Nonnull StepContext context) {
+                super(context);
+            }
+
+            @Override
+            public boolean start() throws Exception {
+                getContext().onSuccess("hello");
+                return true;
+            }
+        }
+
+        @TestExtension
+        public static final class DescriptorImpl extends StepDescriptor {
+            @Override
+            public Set<? extends Class<?>> getRequiredContext() {
+                return null;
+            }
+
+            @Override
+            public String getFunctionName() {
+                return "stepA";
+            }
+
+            @Override @Nonnull
+            public Type getResultType() {
+                return String.class;
+            }
+        }
+    }
+
+    public static final class StepB extends AbstractStepImpl {
+        @DataBoundConstructor
+        public StepB() {
+        }
+
+        private static class StepExecutionImpl extends AbstractSynchronousStepExecution<List<Integer>> {
+            @Override
+            protected List<Integer> run() throws Exception {
+                return Arrays.asList(1, 2, 3);
+            }
+        }
+
+        @TestExtension
+        public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
+            public DescriptorImpl() {
+                super(StepExecutionImpl.class);
+            }
+
+            protected DescriptorImpl(Class<? extends StepExecution> executionType) {
+                super(executionType);
+            }
+
+            @Override
+            public String getFunctionName() {
+                return "stepB";
+            }
+        }
     }
 }

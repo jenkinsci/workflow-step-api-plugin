@@ -50,6 +50,8 @@ public abstract class Step extends AbstractDescribableImpl<Step> implements Exte
      *
      * Arguments are passed when {@linkplain StepDescriptor#newInstance instantiating steps}.
      *
+     * <p>Implementors should specify a more concrete return type (making use of return type covariance).</p>
+     *
      * @return
      *      true if the execution of this step has synchronously completed before this method returns.
      *      It is the callee's responsibility to set the return value via {@link StepContext#onSuccess(Object)}

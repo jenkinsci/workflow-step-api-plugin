@@ -24,6 +24,7 @@ public abstract class AbstractStepDescriptorImpl extends StepDescriptor {
         this.executionType = executionType;
     }
 
+    @Override
     public final Class<? extends StepExecution> getExecutionType() {
         return executionType;
     }

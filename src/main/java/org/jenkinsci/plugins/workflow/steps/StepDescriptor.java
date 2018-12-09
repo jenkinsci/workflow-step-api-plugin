@@ -41,11 +41,14 @@ import org.jenkinsci.plugins.structs.describable.DescribableModel;
 import org.jenkinsci.plugins.structs.describable.DescribableParameter;
 import org.jenkinsci.plugins.structs.describable.UninstantiatedDescribable;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.export.TypeUtil;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -259,6 +262,51 @@ public abstract class StepDescriptor extends Descriptor<Step> {
             if (v==null)
                 throw new MissingContextVariableException(type);
         }
+    }
+
+    /**
+     * Get the associated {@link Step}'s execution class, or the closest known superclass.
+     * <p>The default implementation returns the return type of {@link Step#start start}, as declared in the associated step subclass.</p>
+     * @since 2.18
+     */
+    public Type getExecutionType() {
+        try {
+            return clazz.getMethod("start", StepContext.class).getGenericReturnType();
+        } catch (NoSuchMethodException ignored) { //this should never happen
+            return StepExecution.class;
+        }
+    }
+
+    /**
+     * Get the return type of the associated execution - that is, the type of the object being sent to {@link StepContext#onSuccess(Object)}.
+     * <p>Subclasses should override this method to provide proper type information.</p>
+     * <p><em>Override note:</em> if your result type is generic, you can make use of a helper such as {@code TypeUtils.parameterize(...)}
+     * from Apache Commons. If you decide to provide your own {@link Type} implementation, your {@link Type#getTypeName() getTypeName}
+     * should return syntactically correct Java for declaring a variable elsewhere.</p>
+     * @since 2.18
+     */
+    @Nonnull
+    public Type getResultType() {
+        Class<?> executionClass = TypeUtil.erasure(getExecutionType());
+        Class<?>[] knownGenericSuperClasses = new Class[]{
+            SynchronousStepExecution.class,
+            SynchronousNonBlockingStepExecution.class,
+            AbstractSynchronousStepExecution.class,
+            AbstractSynchronousNonBlockingStepExecution.class,
+        };
+        for (Class<?> knownSuperClass : knownGenericSuperClasses) {
+            if (knownSuperClass.isAssignableFrom(executionClass)) {
+                while (!executionClass.getSuperclass().equals(knownSuperClass)) {
+                    executionClass = executionClass.getSuperclass();
+                }
+                Type possiblyGenericKnownSuperType = executionClass.getGenericSuperclass();
+                if (possiblyGenericKnownSuperType instanceof ParameterizedType) {
+                    return ((ParameterizedType) possiblyGenericKnownSuperType).getActualTypeArguments()[0];
+                }
+                break;
+            }
+        }
+        return Object.class;
     }
 
     public static ExtensionList<StepDescriptor> all() {
