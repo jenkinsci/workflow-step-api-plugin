@@ -104,6 +104,10 @@ public abstract class BodyExecutionCallback implements Serializable {
 
         /**
          * Called when the body is finished.
+         *
+         * <p>This method will run in the CPS VM thread and as such should not perform I/O or block.
+         * Use {@link GeneralNonBlockingStepExecution.TailCall} as needed.
+         *
          * @param context the body context as passed to {@link #onSuccess} or {@link #onFailure}
          * @throws Exception if anything is thrown here, the step fails too
          */

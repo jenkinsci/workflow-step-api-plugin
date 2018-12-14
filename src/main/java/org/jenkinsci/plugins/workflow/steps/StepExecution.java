@@ -60,7 +60,10 @@ public abstract class StepExecution implements Serializable {
     /**
      * Start execution of something and report the end result back to the given callback.
      *
-     * Arguments are passed when {@linkplain StepDescriptor#newInstance(Map) instantiating steps}.
+     * <p>Arguments are passed when {@linkplain StepDescriptor#newInstance(Map) instantiating steps}.
+     *
+     * <p>This method will run in the CPS VM thread and as such should not perform I/O or block.
+     * Use {@link SynchronousNonBlockingStepExecution} or {@link GeneralNonBlockingStepExecution} as needed.
      *
      * @return
      *      true if the execution of this step has synchronously completed before this method returns.
