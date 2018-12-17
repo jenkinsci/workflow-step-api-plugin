@@ -24,13 +24,16 @@
 
 package org.jenkinsci.plugins.workflow.steps;
 
+import hudson.model.Result;
 import hudson.model.TaskListener;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
+import java.util.logging.Level;
 import static org.hamcrest.Matchers.*;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowExecution;
+import org.jenkinsci.plugins.workflow.cps.CpsStepContext;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.test.steps.SemaphoreStep;
@@ -41,6 +44,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.LoggerRule;
 import org.jvnet.hudson.test.TestExtension;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -49,6 +53,8 @@ public class GeneralNonBlockingStepExecutionTest {
     @ClassRule public static BuildWatcher buildWatcher = new BuildWatcher();
 
     @Rule public JenkinsRule r = new JenkinsRule();
+
+    @Rule public LoggerRule logging = new LoggerRule();
 
     @Test public void getStatus() throws Exception {
         WorkflowJob p = r.createProject(WorkflowJob.class, "p");
@@ -64,6 +70,42 @@ public class GeneralNonBlockingStepExecutionTest {
         assertThat(((CpsFlowExecution) b.getExecution()).getThreadDump().toString(), containsString("at DSL.slowBlock(running in thread: org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution [#1])"));
         endExit.release();
         r.assertBuildStatusSuccess(r.waitForCompletion(b));
+    }
+
+    @Test public void stop() throws Exception {
+        WorkflowJob p = r.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition("slowBlock {semaphore 'wait'}", true));
+        logging.record(CpsStepContext.class, Level.WARNING).capture(100);
+        {
+            WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+            startEnter.acquire();
+            b.getExecutor().interrupt();
+            r.assertBuildStatus(Result.ABORTED, r.waitForCompletion(b));
+            startExit.release();
+        }
+        {
+            WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+            startEnter.acquire();
+            startExit.release();
+            SemaphoreStep.waitForStart("wait/1", b);
+            b.getExecutor().interrupt();
+            endEnter.acquire();
+            endExit.release();
+            r.assertBuildStatus(Result.ABORTED, r.waitForCompletion(b));
+            SemaphoreStep.success("wait/1", null);
+        }
+        {
+            WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+            startEnter.acquire();
+            startExit.release();
+            SemaphoreStep.waitForStart("wait/2", b);
+            SemaphoreStep.success("wait/2", null);
+            endEnter.acquire();
+            b.getExecutor().interrupt();
+            r.assertBuildStatus(Result.ABORTED, r.waitForCompletion(b));
+            endExit.release();
+        }
+        assertThat(logging.getRecords(), empty());
     }
 
     private static Semaphore startEnter, startExit, endEnter, endExit;

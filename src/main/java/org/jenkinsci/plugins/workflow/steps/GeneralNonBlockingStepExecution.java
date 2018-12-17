@@ -79,7 +79,7 @@ public abstract class GeneralNonBlockingStepExecution extends StepExecution {
             } catch (Throwable e) {
                 if (!stopping) {
                     getContext().onFailure(e);
-                }
+                } // TODO else perhaps call addSuppressed (same in TailCall.onSuccess)
             } finally {
                 threadName = null;
                 task = null;
@@ -133,7 +133,9 @@ public abstract class GeneralNonBlockingStepExecution extends StepExecution {
                 try {
                     finished(context);
                 } catch (Exception x) {
-                    context.onFailure(x);
+                    if (!stopping) {
+                        context.onFailure(x);
+                    }
                     return;
                 }
                 context.onSuccess(result);
