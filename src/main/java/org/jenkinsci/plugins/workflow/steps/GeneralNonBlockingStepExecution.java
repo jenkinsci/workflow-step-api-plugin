@@ -43,7 +43,7 @@ public abstract class GeneralNonBlockingStepExecution extends StepExecution {
 
     private transient volatile Future<?> task;
     private String threadName;
-    private transient boolean stopping;
+    private transient Throwable stopCause;
 
     protected GeneralNonBlockingStepExecution(StepContext context) {
         super(context);
@@ -66,7 +66,7 @@ public abstract class GeneralNonBlockingStepExecution extends StepExecution {
      * @param block some code to run in a utility thread
      */
     protected final void run(Block block) {
-        if (stopping) {
+        if (stopCause != null) {
             return;
         }
         final Authentication auth = Jenkins.getAuthentication();
@@ -76,10 +76,12 @@ public abstract class GeneralNonBlockingStepExecution extends StepExecution {
                 try (ACLContext acl = ACL.as(auth)) {
                     block.run();
                 }
-            } catch (Throwable e) {
-                if (!stopping) {
-                    getContext().onFailure(e);
-                } // TODO else perhaps call addSuppressed (same in TailCall.onSuccess)
+            } catch (Throwable x) {
+                if (stopCause == null) {
+                    getContext().onFailure(x);
+                } else {
+                    stopCause.addSuppressed(x);
+                }
             } finally {
                 threadName = null;
                 task = null;
@@ -92,7 +94,7 @@ public abstract class GeneralNonBlockingStepExecution extends StepExecution {
      */
     @Override
     public void stop(Throwable cause) throws Exception {
-        stopping = true;
+        stopCause = cause;
         if (task != null) {
             task.cancel(true);
         }
@@ -133,8 +135,10 @@ public abstract class GeneralNonBlockingStepExecution extends StepExecution {
                 try {
                     finished(context);
                 } catch (Exception x) {
-                    if (!stopping) {
+                    if (stopCause == null) {
                         context.onFailure(x);
+                    } else {
+                        stopCause.addSuppressed(x);
                     }
                     return;
                 }
