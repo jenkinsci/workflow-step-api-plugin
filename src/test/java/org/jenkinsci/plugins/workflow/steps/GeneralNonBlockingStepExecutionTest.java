@@ -62,12 +62,19 @@ public class GeneralNonBlockingStepExecutionTest {
         WorkflowRun b = p.scheduleBuild2(0).waitForStart();
         startEnter.acquire();
         assertThat(((CpsFlowExecution) b.getExecution()).getThreadDump().toString(), containsString("at DSL.slowBlock(running in thread: org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution [#1])"));
+        Thread.sleep(250); // give CPS thread some time to go back to sleep
+        assertTrue(SynchronousNonBlockingStepExecutionTest.blocksRestart(b));
         startExit.release();
         SemaphoreStep.waitForStart("wait/1", b);
         assertThat(((CpsFlowExecution) b.getExecution()).getThreadDump().toString(), containsString("at DSL.slowBlock(not currently scheduled, or running blocks)"));
+        while (SynchronousNonBlockingStepExecutionTest.blocksRestart(b)) {
+            Thread.sleep(100); // as above
+        }
         SemaphoreStep.success("wait/1", null);
         endEnter.acquire();
         assertThat(((CpsFlowExecution) b.getExecution()).getThreadDump().toString(), containsString("at DSL.slowBlock(running in thread: org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution [#1])"));
+        Thread.sleep(250); // as above
+        assertTrue(SynchronousNonBlockingStepExecutionTest.blocksRestart(b));
         endExit.release();
         r.assertBuildStatusSuccess(r.waitForCompletion(b));
     }

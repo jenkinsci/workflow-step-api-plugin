@@ -83,6 +83,10 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
         }
     }
 
+    @Override public boolean blocksRestart() {
+        return threadName != null;
+    }
+
     static synchronized ExecutorService getExecutorService() {
         if (executorService == null) {
             executorService = Executors.newCachedThreadPool(new NamingThreadFactory(new ClassLoaderSanityThreadFactory(new DaemonThreadFactory()), "org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution"));

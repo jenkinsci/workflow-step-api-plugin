@@ -116,6 +116,10 @@ public abstract class GeneralNonBlockingStepExecution extends StepExecution {
         }
     }
 
+    @Override public boolean blocksRestart() {
+        return threadName != null;
+    }
+
     /**
      * Variant of {@link BodyExecutionCallback.TailCall} which wraps {@link #finished} in {@link #run}.
      */

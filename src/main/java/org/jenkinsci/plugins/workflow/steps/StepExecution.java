@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import jenkins.model.queue.AsynchronousExecution;
 import jenkins.util.Timer;
 
 /**
@@ -124,6 +125,19 @@ public abstract class StepExecution implements Serializable {
      */
     public @CheckForNull String getStatus() {
         return null;
+    }
+
+    /**
+     * Allows a step to indicate that {@link AsynchronousExecution#blocksRestart} should be true.
+     * Typically this would be true if {@link #getStatus} indicates that the step is in the middle of something active,
+     * as opposed to waiting for an external event or a body to complete.
+     * <p>Note that activity in the CPS VM thread automatically blocks restart,
+     * so overriding this is only necessary for steps using a background thread,
+     * such as {@link SynchronousNonBlockingStepExecution} or {@link GeneralNonBlockingStepExecution}.
+     * @return false by default
+     */
+    public boolean blocksRestart() {
+        return false;
     }
 
     /**
