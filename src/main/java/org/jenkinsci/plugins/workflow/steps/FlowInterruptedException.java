@@ -100,7 +100,7 @@ public final class FlowInterruptedException extends InterruptedException {
         if (t instanceof AbortException) {
             listener.getLogger().println(t.getMessage());
         } else if (t != null) {
-            listener.getLogger().println(Functions.printThrowable(t).trim()); // TODO 2.43+ use Functions.printStackTrace
+            Functions.printStackTrace(t, listener.getLogger());
         }
     }
 
