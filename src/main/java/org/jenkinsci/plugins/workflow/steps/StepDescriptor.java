@@ -99,6 +99,7 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      * Return true if this step can accept an implicit block argument.
      * (If it can, but it is called without a block, {@link StepContext#hasBody} will be false.)
      * @see StepContext#newBodyInvoker()
+     * @see GeneralNonBlockingStepExecution
      */
     public boolean takesImplicitBlockArgument() {
         return false;
@@ -310,7 +311,7 @@ public abstract class StepDescriptor extends Descriptor<Step> {
         List<StepDescriptor> r = new ArrayList<>();
         // honor ordinals among meta-steps
         for (StepDescriptor d : StepDescriptor.allMeta()) {
-            Class<?> a = d.getMetaStepArgumentType();
+            Class a = d.getMetaStepArgumentType();
             if (a==null)    continue;   // defensive check
             if (SymbolLookup.get().findDescriptor(a,symbol)!=null)
                 r.add(d);

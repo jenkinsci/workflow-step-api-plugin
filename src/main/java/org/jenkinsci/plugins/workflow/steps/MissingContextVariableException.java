@@ -18,12 +18,26 @@ public class MissingContextVariableException extends Exception {
     private final @Nonnull Class<?> type;
 
     public MissingContextVariableException(@Nonnull Class<?> type) {
-        super("Required context "+type+" is missing");
         this.type = type;
     }
 
     public Class<?> getType() {
         return type;
+    }
+
+    @Override public String getMessage() {
+        StringBuilder b = new StringBuilder("Required context ").append(type).append(" is missing");
+        boolean first = true;
+        for (StepDescriptor p : getProviders()) {
+            if (first) {
+                b.append("\nPerhaps you forgot to surround the code with a step that provides this, such as: ");
+                first = false;
+            } else {
+                b.append(", ");
+            }
+            b.append(p.getFunctionName());
+        }
+        return b.toString();
     }
 
     /**

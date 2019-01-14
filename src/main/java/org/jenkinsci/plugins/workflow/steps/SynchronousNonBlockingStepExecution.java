@@ -1,17 +1,15 @@
 package org.jenkinsci.plugins.workflow.steps;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.security.ACL;
+import hudson.security.ACLContext;
 import hudson.util.DaemonThreadFactory;
 import hudson.util.NamingThreadFactory;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import javax.annotation.Nonnull;
 import jenkins.model.Jenkins;
-import jenkins.security.NotReallyRoleSensitiveCallable;
 import org.acegisecurity.Authentication;
 
 /**
@@ -23,7 +21,7 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
 
     private transient volatile Future<?> task;
     private transient String threadName;
-    private transient boolean stopping;
+    private transient Throwable stopCause;
 
     private static ExecutorService executorService;
 
@@ -41,20 +39,19 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
     @Override
     public final boolean start() throws Exception {
         final Authentication auth = Jenkins.getAuthentication();
-        task = getExecutorService().submit(new Runnable() {
-            @SuppressFBWarnings(value="SE_BAD_FIELD", justification="not serializing anything here")
-            @Override public void run() {
-                try {
-                    getContext().onSuccess(ACL.impersonate(auth, new NotReallyRoleSensitiveCallable<T, Exception>() {
-                        @Override public T call() throws Exception {
-                            threadName = Thread.currentThread().getName();
-                            return SynchronousNonBlockingStepExecution.this.run();
-                        }
-                    }));
-                } catch (Throwable e) {
-                    if (!stopping) {
-                        getContext().onFailure(e);
-                    }
+        task = getExecutorService().submit(() -> {
+            threadName = Thread.currentThread().getName();
+            try {
+                T ret;
+                try (ACLContext acl = ACL.as(auth)) {
+                    ret = run();
+                }
+                getContext().onSuccess(ret);
+            } catch (Throwable x) {
+                if (stopCause == null) {
+                    getContext().onFailure(x);
+                } else {
+                    stopCause.addSuppressed(x);
                 }
             }
         });
@@ -67,7 +64,7 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
     @Override
     public void stop(Throwable cause) throws Exception {
         if (task != null) {
-            stopping = true;
+            stopCause = cause;
             task.cancel(true);
         }
         super.stop(cause);
@@ -84,6 +81,10 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
         } else {
             return "not yet scheduled";
         }
+    }
+
+    @Override public boolean blocksRestart() {
+        return threadName != null;
     }
 
     static synchronized ExecutorService getExecutorService() {
