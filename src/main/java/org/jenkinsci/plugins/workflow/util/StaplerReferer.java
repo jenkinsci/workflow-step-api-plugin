@@ -24,7 +24,6 @@
 
 package org.jenkinsci.plugins.workflow.util;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.model.Item;
 import java.net.URI;
 import java.util.logging.Level;
@@ -59,7 +58,6 @@ public class StaplerReferer {
     /**
      * Like {@link StaplerRequest#findAncestorObject} except works also in configuration screens when a lazy-load section is newly added.
      */
-    @SuppressFBWarnings(value="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification="TODO 1.653+ switch to Jenkins.getInstanceOrNull")
     public static @CheckForNull <T extends Item> T findItemFromRequest(Class<T> type) {
         StaplerRequest request = Stapler.getCurrentRequest();
         if (request == null) {
@@ -75,7 +73,7 @@ public class StaplerReferer {
         if (referer != null) {
             String name = itemFromReferer(referer);
             if (name != null) {
-                Jenkins jenkins = Jenkins.getInstance();
+                Jenkins jenkins = Jenkins.getInstanceOrNull();
                 if (jenkins == null) {
                     LOGGER.warning("Jenkins is not running");
                     return null;

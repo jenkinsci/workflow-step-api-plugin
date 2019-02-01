@@ -31,7 +31,6 @@ import org.jvnet.hudson.test.TestExtension;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.util.Collections;
-import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.assertTrue;
 
 public class SynchronousNonBlockingStepExecutionTest {
@@ -55,7 +54,7 @@ public class SynchronousNonBlockingStepExecutionTest {
         System.out.println("Waiting to syncnonblocking to start...");
         SynchronousNonBlockingStep.waitForStart("wait", b);
         Thread.sleep(250); // give CPS thread some time to go back to sleep
-        assertTrue(blocksRestart(b));
+        assertTrue(b.getExecutor().getAsynchronousExecution().blocksRestart());
 
         // At this point the execution is paused inside the synchronous non-blocking step
         // Check for FlowNode created
@@ -89,13 +88,6 @@ public class SynchronousNonBlockingStepExecutionTest {
         j.assertBuildStatusSuccess(b);
     }
 
-    static boolean blocksRestart(WorkflowRun b) throws Exception {
-        if (b.getExecutor().getAsynchronousExecution().blocksRestart()) {
-            return true;
-        }
-        // TODO delete when implemented in workflow-cps:
-        return b.getExecution().getCurrentExecutions(false).get(1, TimeUnit.SECONDS).stream().anyMatch(StepExecution::blocksRestart);
-    }
 
     @Test
     public void interruptedTest() throws Exception {
