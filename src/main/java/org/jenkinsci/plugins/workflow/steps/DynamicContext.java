@@ -24,11 +24,8 @@
 
 package org.jenkinsci.plugins.workflow.steps;
 
-import hudson.console.ConsoleLogFilter;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
@@ -37,8 +34,6 @@ import javax.annotation.Nonnull;
  */
 public abstract class DynamicContext implements Serializable {
 
-    private static final Logger LOGGER = Logger.getLogger(DynamicContext.class.getName());
-
     /**
      * Restricted version of {@link StepContext} used only for delegation in {@link #get(Class, DelegatedContext)}.
      */
@@ -46,12 +41,14 @@ public abstract class DynamicContext implements Serializable {
 
         /**
          * Look for objects of the same or another type defined in this context.
-         * A {@link DynamicContext} may use this handle to query the {@link StepContext} for objects of other types.
-         * It may even look for objects of the same type as is being requested,
+         * <p>A {@link DynamicContext} may use this handle to query the {@link StepContext} for objects of other types.
+         * <p>It may even look for objects of the same type as is being requested,
          * as is typically done for merge calls such as those enumerated in {@link BodyInvoker#withContext},
-         * and it may ask for objects also provided by {@link DynamicContext},
+         * and it may ask for objects also provided by {@link DynamicContext};
          * but no recursive call to {@link DynamicContext#get(Class, DelegatedContext)} on the same type will be made
          * (even on different {@link DynamicContext} instances)—null will be returned instead.
+         * <p>Note that since merge calls may be applied at different scopes,
+         * a non-idempotent merge may be observed as multiply applied in a nested scope.
          * @param <T> same as {@link StepContext#get}
          * @param key same as {@link StepContext#get}
          * @return same as {@link StepContext#get}, but may additionally return null to break recursion
@@ -137,75 +134,6 @@ public abstract class DynamicContext implements Serializable {
             } else {
                 return null;
             }
-        }
-
-    }
-
-    /**
-     * Wraps a dynamic context with logic to prevent it from being instantiated in nested scopes.
-     * Useful for object types which are merged (as in {@link BodyInvoker#withContext}),
-     * especially when the merge is not idempotent (as for example some {@link ConsoleLogFilter}s).
-     * <p>There is no need to call {@link #merge} in this case.
-     */
-    public static void invokeNonNesting(@Nonnull BodyInvoker invoker, @Nonnull StepContext context, @Nonnull DynamicContext dynamicContext) throws IOException, InterruptedException {
-        DynamicContext original = context.get(DynamicContext.class);
-        LOGGER.log(Level.FINE, "nesting on {0} + {1}", new Object[] {original, dynamicContext});
-        DynamicContext mergedContext = merge(original, dynamicContext);
-        invoker.withContexts(new NonNesting(mergedContext), new NestingBlock(context.get(NestingBlock.class), mergedContext));
-    }
-    private static final class NonNesting extends DynamicContext {
-        
-        private static final long serialVersionUID = 1;
-
-        private final @Nonnull DynamicContext original;
-
-        NonNesting(DynamicContext original) {
-            this.original = original;
-        }
-
-        @Override public <T> T get(Class<T> key, DelegatedContext context) throws IOException, InterruptedException {
-            for (NestingBlock nestingBlock = context.get(NestingBlock.class); ; nestingBlock = nestingBlock.parent) {
-                assert nestingBlock != null;
-                if (nestingBlock.dynamicContext == original) {
-                    if (nestingBlock.value != null) {
-                        if (key.isInstance(nestingBlock.value)) {
-                            LOGGER.log(Level.FINE, "reusing {0} from {1}", new Object[] {nestingBlock.value, original});
-                            // TODO wrong, should return null, but only if called from a different scope
-                            return key.cast(nestingBlock.value);
-                        } else {
-                            return null;
-                        }
-                    } else {
-                        T value = original.get(key, context);
-                        if (value == null) {
-                            return null;
-                        } else {
-                            LOGGER.log(Level.FINE, "registering {0} from {1}", new Object[] {value, original});
-                            nestingBlock.value = value;
-                            return value;
-                        }
-                    }
-                }
-            }
-        }
-
-        @Override public String toString() {
-            return "NonNesting[" + original + "]";
-        }
-
-    }
-    /** Contextual object recording which have been used. */
-    private static final class NestingBlock implements Serializable {
-
-        private static final long serialVersionUID = 1;
-
-        private final @CheckForNull NestingBlock parent;
-        private final @Nonnull DynamicContext dynamicContext;
-        private Object value;
-
-        private NestingBlock(@CheckForNull NestingBlock parent, @Nonnull DynamicContext dynamicContext) {
-            this.parent = parent;
-            this.dynamicContext = dynamicContext;
         }
 
     }
