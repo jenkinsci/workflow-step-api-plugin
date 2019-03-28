@@ -124,7 +124,7 @@ public abstract class DynamicContext implements Serializable {
         protected abstract @Nonnull Class<T> type();
 
         /**
-         * As {@link #get(Class, StaticContext)}.
+         * As {@link #get(Class, DelegatedContext)}.
          */
         protected abstract @CheckForNull T get(DelegatedContext context) throws IOException, InterruptedException;
 
