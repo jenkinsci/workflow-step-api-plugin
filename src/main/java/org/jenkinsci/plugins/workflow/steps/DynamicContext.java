@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Allows {@link StepContext#get} to provide a dynamically computed value.
@@ -55,7 +56,7 @@ public abstract class DynamicContext implements Serializable {
          * @throws IOException same as {@link StepContext#get}
          * @throws InterruptedException same as {@link StepContext#get}
          */
-         @CheckForNull <T> T get(Class<T> key) throws IOException, InterruptedException;
+         @Nullable <T> T get(Class<T> key) throws IOException, InterruptedException;
 
     }
 
