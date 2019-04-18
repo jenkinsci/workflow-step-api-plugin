@@ -24,16 +24,20 @@
 
 package org.jenkinsci.plugins.workflow.steps;
 
+import hudson.ExtensionPoint;
 import java.io.IOException;
-import java.io.Serializable;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
  * Allows {@link StepContext#get} to provide a dynamically computed value.
+ * <p>This is registered as an extension, so it may be injected into any build.
+ * If you would like to restrict action to a particular step block,
+ * use {@link BodyInvoker#withContext} to insert some serializable struct
+ * that the dynamic context implementation will look for.
  */
-public abstract class DynamicContext implements Serializable {
+public interface DynamicContext extends ExtensionPoint {
 
     /**
      * Restricted version of {@link StepContext} used only for delegation in {@link #get(Class, DelegatedContext)}.
@@ -45,9 +49,9 @@ public abstract class DynamicContext implements Serializable {
          * <p>A {@link DynamicContext} may use this handle to query the {@link StepContext} for objects of other types.
          * <p>It may even look for objects of the same type as is being requested,
          * as is typically done for merge calls such as those enumerated in {@link BodyInvoker#withContext},
-         * and it may ask for objects also provided by {@link DynamicContext};
-         * but no recursive call to {@link DynamicContext#get(Class, DelegatedContext)} on the same type will be made
-         * (even on different {@link DynamicContext} instances)—null will be returned instead.
+         * and it may ask for objects also provided by some {@link DynamicContext};
+         * but no recursive call to {@link DynamicContext#get(Class, DelegatedContext)}
+         * on the same type from the same extension will be made—null will be returned instead.
          * <p>Note that since merge calls may be applied at different scopes,
          * a non-idempotent merge may be observed as multiply applied in a nested scope.
          * @param <T> same as {@link StepContext#get}
@@ -69,55 +73,13 @@ public abstract class DynamicContext implements Serializable {
      * @throws IOException same as {@link StepContext#get}
      * @throws InterruptedException same as {@link StepContext#get}
      */
-    public abstract @CheckForNull <T> T get(Class<T> key, DelegatedContext context) throws IOException, InterruptedException;
-
-    /**
-     * Applies a more specific dynamic context to a nested scope.
-     * @param original any dynamic context object found in the parent scope
-     * @param subsequent overrides
-     * @return a merger which preferentially looks up objects in {@code subsequent}
-     */
-    public static @Nonnull DynamicContext merge(@CheckForNull DynamicContext original, @Nonnull DynamicContext subsequent) {
-        if (original == null) {
-            return subsequent;
-        } else {
-            return new Merged(original, subsequent);
-        }
-    }
-    private static final class Merged extends DynamicContext {
-
-        private static final long serialVersionUID = 1;
-
-        private final @Nonnull DynamicContext original;
-        private final @Nonnull DynamicContext subsequent;
-
-        Merged(DynamicContext original, DynamicContext subsequent) {
-            this.original = original;
-            this.subsequent = subsequent;
-        }
-
-        @Override public <T> T get(Class<T> key, DelegatedContext context) throws IOException, InterruptedException {
-            T val = subsequent.get(key, context);
-            if (val != null) {
-                return val;
-            } else {
-                return original.get(key, context);
-            }
-        }
-
-        @Override public String toString() {
-            return "DynamicContext.Merged[" + original + ", " + subsequent + "]";
-        }
-        
-    }
+     @CheckForNull <T> T get(Class<T> key, DelegatedContext context) throws IOException, InterruptedException;
 
     /**
      * A convenience subclass for the common case that you are returning only one kind of object.
      * @param <T> the type of object
      */
-    public static abstract class Typed<T> extends DynamicContext {
-
-        private static final long serialVersionUID = 1;
+    abstract class Typed<T> implements DynamicContext {
 
         /**
          * A type token.

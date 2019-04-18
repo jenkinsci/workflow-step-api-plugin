@@ -55,10 +55,8 @@ public abstract class BodyInvoker {
      * <dt>{@link EnvironmentExpander}<dd>use {@link EnvironmentExpander#merge}
      * <dt>{@link ConsoleLogFilter}<dd>use {@link #mergeConsoleLogFilters}
      * <dt>{@link LauncherDecorator}<dd>use {@link #mergeLauncherDecorators}
-     * <dt>{@link DynamicContext}<dd>use {@link DynamicContext#merge}
      * </dl>
      * @see StepContext#get(Class)
-     * @see DynamicContext
      *
      * @return this object
      */
