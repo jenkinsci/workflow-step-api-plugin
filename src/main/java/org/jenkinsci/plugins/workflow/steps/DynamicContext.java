@@ -52,8 +52,6 @@ public interface DynamicContext extends ExtensionPoint {
          * and it may ask for objects also provided by some {@link DynamicContext};
          * but no recursive call to {@link DynamicContext#get(Class, DelegatedContext)}
          * on the same type from the same extension will be made—null will be returned instead.
-         * <p>Note that since merge calls may be applied at different scopes,
-         * a non-idempotent merge may be observed as multiply applied in a nested scope.
          * @param <T> same as {@link StepContext#get}
          * @param key same as {@link StepContext#get}
          * @return same as {@link StepContext#get}, but may additionally return null to break recursion
