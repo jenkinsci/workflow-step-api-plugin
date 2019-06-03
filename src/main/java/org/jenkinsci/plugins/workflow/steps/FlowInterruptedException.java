@@ -76,8 +76,6 @@ public final class FlowInterruptedException extends InterruptedException {
 
     /**
      * If a build catches this exception, it should use this method to report it.
-     * @param run
-     * @param listener
      */
     public void handle(Run<?,?> run, TaskListener listener) {
         Set<CauseOfInterruption> boundCauses = new HashSet<>();
@@ -91,14 +89,16 @@ public final class FlowInterruptedException extends InterruptedException {
                 cause.print(listener);
             }
         }
-        print(getCause(), listener);
+        print(getCause(), run, listener);
         for (Throwable t : getSuppressed()) {
-            print(t, listener);
+            print(t, run, listener);
         }
     }
-    private static void print(@CheckForNull Throwable t, @Nonnull TaskListener listener) {
+    private static void print(@CheckForNull Throwable t, Run<?,?> run, @Nonnull TaskListener listener) {
         if (t instanceof AbortException) {
             listener.getLogger().println(t.getMessage());
+        } else if (t instanceof FlowInterruptedException) {
+            ((FlowInterruptedException) t).handle(run, listener);
         } else if (t != null) {
             Functions.printStackTrace(t, listener.getLogger());
         }
