@@ -74,6 +74,7 @@ public abstract class StepContext implements FutureCallback<Object>, Serializabl
      *      could have failed to load.) This exception is thrown in such situations just like
      *      {@code FlowExecutionOwner.get} throws IOException.
      * @see BodyInvoker#withContext
+     * @see DynamicContext
      */
     public abstract @Nullable <T> T get(Class<T> key) throws IOException, InterruptedException;
 
