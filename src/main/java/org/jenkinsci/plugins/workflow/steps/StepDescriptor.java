@@ -37,6 +37,7 @@ import hudson.model.Descriptor;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.structs.SymbolLookup;
+import org.jenkinsci.plugins.structs.describable.CustomDescribableModel;
 import org.jenkinsci.plugins.structs.describable.DescribableModel;
 import org.jenkinsci.plugins.structs.describable.DescribableParameter;
 import org.jenkinsci.plugins.structs.describable.UninstantiatedDescribable;
@@ -197,7 +198,9 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      *      Named arguments and values, à la Ant task or Maven mojos.
      *      Generally should follow the semantics of {@link DescribableModel#instantiate}.
      * @return an instance of {@link #clazz}
+     * @deprecated instead use {@link CustomDescribableModel}
      */
+    @Deprecated
     public Step newInstance(Map<String,Object> arguments) throws Exception {
         return new DescribableModel<>(clazz).instantiate(arguments);
     }
@@ -226,7 +229,9 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      * @param step a fully-configured step (assignable to {@link #clazz})
      * @return arguments that could be passed to {@link #newInstance} to create a similar step instance
      * @throws UnsupportedOperationException if this descriptor lacks the ability to do such a calculation
+     * @deprecated instead use {@link CustomDescribableModel}
      */
+    @Deprecated
     public UninstantiatedDescribable uninstantiate(Step step) throws UnsupportedOperationException {
         if (Util.isOverridden(StepDescriptor.class, getClass(), "uninstantiate", Step.class)) {
             // Newer clients are called older implementations.
