@@ -12,7 +12,7 @@ import java.io.Serializable;
  * TODO: better summary.jelly
  * @author Kohsuke Kawaguchi
  */
-class ExceptionCause extends CauseOfInterruption implements Serializable {
+public class ExceptionCause extends CauseOfInterruption implements Serializable {
     private final Throwable t;
 
     public ExceptionCause(Throwable t) {
