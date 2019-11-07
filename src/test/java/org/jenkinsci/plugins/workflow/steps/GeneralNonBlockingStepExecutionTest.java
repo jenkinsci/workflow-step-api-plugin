@@ -119,13 +119,13 @@ public class GeneralNonBlockingStepExecutionTest {
     @Issue("JENKINS-58878")
     @Test public void shouldNotHang() throws Exception {
         int iterations = 50;
-        startExit = new Semaphore(iterations); // Prevents the semaphores from blocking inside of the slowBlock step.
-        endExit = new Semaphore(iterations);
+        startExit.release(iterations); // Prevents the semaphores from blocking inside of the slowBlock step.
+        endExit.release(iterations);
         WorkflowJob p = r.createProject(WorkflowJob.class);
         p.setDefinition(new CpsFlowDefinition(
                 "for (int i = 0; i < " + iterations + "; i++) {\n" +
                 "  slowBlock {\n" +
-                "    echo \"At ${i}\"\n" +
+                "    echo(/At $i/)\n" +
                 "  }\n" +
                 "}", true));
         r.buildAndAssertSuccess(p);
