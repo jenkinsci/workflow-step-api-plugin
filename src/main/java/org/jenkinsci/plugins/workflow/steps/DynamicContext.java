@@ -29,8 +29,6 @@ import java.io.IOException;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.Beta;
 
 /**
  * Allows {@link StepContext#get} to provide a dynamically computed value.
@@ -39,7 +37,6 @@ import org.kohsuke.accmod.restrictions.Beta;
  * use {@link BodyInvoker#withContext} to insert some serializable struct
  * that the dynamic context implementation will look for.
  */
-@Restricted(Beta.class)
 public interface DynamicContext extends ExtensionPoint {
 
     /**
