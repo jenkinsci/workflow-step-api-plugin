@@ -41,7 +41,6 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.Issue;
@@ -117,7 +116,6 @@ public class GeneralNonBlockingStepExecutionTest {
         assertThat(logging.getRecords(), empty());
     }
 
-    @Ignore
     @Issue("JENKINS-58878")
     @Test public void shouldNotHang() throws Exception {
         int iterations = 50;
