@@ -43,7 +43,7 @@ public abstract class GeneralNonBlockingStepExecution extends StepExecution {
 
     private transient volatile Future<?> task;
     private String threadName;
-    private transient Throwable stopCause;
+    private transient volatile Throwable stopCause;
 
     protected GeneralNonBlockingStepExecution(StepContext context) {
         super(context);

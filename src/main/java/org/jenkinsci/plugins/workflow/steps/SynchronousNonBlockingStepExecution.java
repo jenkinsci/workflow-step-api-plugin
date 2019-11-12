@@ -21,7 +21,7 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
 
     private transient volatile Future<?> task;
     private transient String threadName;
-    private transient Throwable stopCause;
+    private transient volatile Throwable stopCause;
 
     private static ExecutorService executorService;
 
