@@ -90,7 +90,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps</artifactId>
-            <version>2.76-rc2441.219abe39c1f0</version> <!-- TODO: See https://github.com/jenkinsci/workflow-cps-plugin/pull/335 -->
+            <version>2.76</version>
             <scope>test</scope>
         </dependency>
         <dependency>
