@@ -43,6 +43,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Rule;
 import org.jvnet.hudson.test.BuildWatcher;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.LoggerRule;
 import org.jvnet.hudson.test.TestExtension;
@@ -113,6 +114,21 @@ public class GeneralNonBlockingStepExecutionTest {
             endExit.release();
         }
         assertThat(logging.getRecords(), empty());
+    }
+
+    @Issue("JENKINS-58878")
+    @Test public void shouldNotHang() throws Exception {
+        int iterations = 50;
+        startExit.release(iterations); // Prevents the semaphores from blocking inside of the slowBlock step.
+        endExit.release(iterations);
+        WorkflowJob p = r.createProject(WorkflowJob.class);
+        p.setDefinition(new CpsFlowDefinition(
+                "for (int i = 0; i < " + iterations + "; i++) {\n" +
+                "  slowBlock {\n" +
+                "    echo(/At $i/)\n" +
+                "  }\n" +
+                "}", true));
+        r.buildAndAssertSuccess(p);
     }
 
     private static Semaphore startEnter, startExit, endEnter, endExit;
