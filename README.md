@@ -1,10 +1,16 @@
-# Writing Pipeline steps
+# Pipeline: Step API Plugin
+
+[![Jenkins Plugin](https://img.shields.io/jenkins/plugin/v/workflow-step-api)](https://plugins.jenkins.io/workflow-step-api)
+[![Changelog](https://img.shields.io/github/v/tag/jenkinsci/workflow-step-api-plugin?label=changelog)](https://github.com/jenkinsci/workflow-step-api-plugin/blob/master/CHANGELOG.md)
+[![Jenkins Plugin Installs](https://img.shields.io/jenkins/plugin/i/workflow-step-api?color=blue)](https://plugins.jenkins.io/workflow-step-api)
+
+## Developer Guide: Writing Pipeline steps
 
 Plugins can implement custom Pipeline steps with specialized behavior by adding a dependency on `workflow-step-api`.
 Remember to ensure that your baseline Jenkins version is at least as new as that required by the versions of various Pipeline component plugins you are depending on.
 (The plugin wikis will note these baselines.)
 
-## Creating a basic synchronous step
+### Creating a basic synchronous step
 
 When a Pipeline step does something quick and nonblocking, you can make a “synchronous” step.
 The Groovy execution waits for it to finish.
@@ -34,7 +40,7 @@ This is still possible, but not recommended.
 If you must depend on an old version of `workflow-step-api`,
 *and* you are creating a non-blocking synchronous step, you will be obliged to use `AbstractStepImpl`, `AbstractStepDescriptorImpl`, `AbstractSynchronousNonBlockingStepExecution`, `@Inject`, and `@StepContextParameter`.
 
-## Creating an asynchronous step
+### Creating an asynchronous step
 
 For the more general case that a Pipeline step might block in network or disk I/O, and might need to survive Jenkins restarts, you can use a more powerful API.
 This relies on a callback system: the Pipeline engine tells your step when to start, and your step tells Pipeline when it is done.
@@ -62,7 +68,7 @@ getContext().onFailure(cause);
 
 but generally it will need to interrupt whatever process you started.
 
-## Creating a block-scoped step
+### Creating a block-scoped step
 
 Pipeline steps can also take “closures”: a code block which they may run zero or more times, optionally with some added context.
 
@@ -84,7 +90,10 @@ You can pass various contextual objects, as per `StepContext.get` above.
 
 `stop` is optional.
 
-## Using more APIs
+### Using more APIs
 
 You can also add a dependency on `workflow-api` which brings in more Pipeline-specific features.
 For example you can then receive a `FlowNode` from `StepContext.get` and call `addAction` to customize the _Pipeline Steps_ view.
+
+## Version history
+See [the changelog](CHANGELOG.md)
