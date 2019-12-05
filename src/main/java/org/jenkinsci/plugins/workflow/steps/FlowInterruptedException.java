@@ -44,7 +44,8 @@ import jenkins.model.InterruptedBuildAction;
 
 /**
  * Special exception that can be thrown out of {@link StepContext#onFailure} to indicate that the flow was aborted from the inside.
- * (This could be caught like any other exception and rethrown or ignored. It only takes effect if thrown all the way up.)
+ * (This could be caught like any other exception and rethrown or ignored. It only takes effect if thrown all the way up.
+ * Consumers, such as steps, may find {@link #isActualInterruption} useful in deciding whether to ignore or rethrow the exception.)
  * <p>No stack trace is printed (except by {@link #getCause} and/or {@link #getSuppressed} if present),
  * and you can control the {@link Result} and {@link CauseOfInterruption}.
  * <p>Analogous to {@link Executor#interrupt(Result, CauseOfInterruption...)} but does not assume we are running inside an executor thread.
@@ -53,8 +54,16 @@ import jenkins.model.InterruptedBuildAction;
  */
 public final class FlowInterruptedException extends InterruptedException {
 
+    private static final long serialVersionUID = 630482382622970136L;
+
     private final @Nonnull Result result;
     private final @Nonnull List<CauseOfInterruption> causes;
+    /**
+     * If true, this exception represents an actual build interruption, rather than a general error with a result and
+     * no stack trace.
+     * Used by steps like {@code RetryStep} to decide whether to handle or rethrow a {@link FlowInterruptedException}.
+     */
+    private final boolean actualInterruption;
 
     /**
      * Creates a new exception.
@@ -64,6 +73,19 @@ public final class FlowInterruptedException extends InterruptedException {
     public FlowInterruptedException(@Nonnull Result result, @Nonnull CauseOfInterruption... causes) {
         this.result = result;
         this.causes = Arrays.asList(causes);
+        this.actualInterruption = false;
+    }
+
+    /**
+     * Creates a new exception.
+     * @param result the desired result for the flow, typically {@link Result#ABORTED}
+     * @param causes any indications
+     * @param actualInterruption true if this is an actual build interruption (e.g. the user wants to abort the build)
+     */
+    public FlowInterruptedException(@Nonnull Result result, boolean actualInterruption, @Nonnull CauseOfInterruption... causes) {
+        this.result = result;
+        this.causes = Arrays.asList(causes);
+        this.actualInterruption = actualInterruption;
     }
 
     public @Nonnull Result getResult() {
@@ -72,6 +94,10 @@ public final class FlowInterruptedException extends InterruptedException {
 
     public @Nonnull List<CauseOfInterruption> getCauses() {
         return causes;
+    }
+
+    public boolean isActualInterruption() {
+        return actualInterruption;
     }
 
     /**
