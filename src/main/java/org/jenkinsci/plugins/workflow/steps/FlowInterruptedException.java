@@ -62,8 +62,10 @@ public final class FlowInterruptedException extends InterruptedException {
      * If true, this exception represents an actual build interruption, rather than a general error with a result and
      * no stack trace.
      * Used by steps like {@code RetryStep} to decide whether to handle or rethrow a {@link FlowInterruptedException}.
+     * Non-null, except momentarily during deserialization before {@link #readResolve} sets the field to {@code true}
+     * for old instances serialized before this field was added.
      */
-    private final boolean actualInterruption;
+    private Boolean actualInterruption = true;
 
     /**
      * Creates a new exception.
@@ -73,7 +75,7 @@ public final class FlowInterruptedException extends InterruptedException {
     public FlowInterruptedException(@Nonnull Result result, @Nonnull CauseOfInterruption... causes) {
         this.result = result;
         this.causes = Arrays.asList(causes);
-        this.actualInterruption = false;
+        this.actualInterruption = true;
     }
 
     /**
@@ -98,6 +100,13 @@ public final class FlowInterruptedException extends InterruptedException {
 
     public boolean isActualInterruption() {
         return actualInterruption;
+    }
+
+    private Object readResolve() {
+        if (actualInterruption == null) {
+            actualInterruption = true;
+        }
+        return this;
     }
 
     /**
