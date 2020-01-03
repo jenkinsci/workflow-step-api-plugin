@@ -1,5 +1,12 @@
 ## Changelog
 
+### 2.22
+
+Release date: 2020-01-03
+
+-   Developer: Add flag to `FlowInterruptedException` to indicate when the exception is only being used to propagate a result and is not a true interruption. Part of the fix for [JENKINS-60354](https://issues.jenkins-ci.org/browse/JENKINS-60354). ([PR 51](https://github.com/jenkinsci/workflow-step-api-plugin/pull/51))
+-   Internal: Update parent POM. ([PR 52](https://github.com/jenkinsci/workflow-step-api-plugin/pull/52))
+
 ### 2.21
 
 Release date: 2019-11-25
