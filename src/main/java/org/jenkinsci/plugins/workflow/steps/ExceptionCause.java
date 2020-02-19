@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.workflow.steps;
 
 import jenkins.model.CauseOfInterruption;
+import org.kohsuke.stapler.export.Exported;
 
 import java.io.Serializable;
 
@@ -13,6 +14,9 @@ import java.io.Serializable;
  * @author Kohsuke Kawaguchi
  */
 class ExceptionCause extends CauseOfInterruption implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private final Throwable t;
 
     public ExceptionCause(Throwable t) {
@@ -24,5 +28,8 @@ class ExceptionCause extends CauseOfInterruption implements Serializable {
         return "Exception: "+t.getMessage();
     }
 
-    private static final long serialVersionUID = 1L;
+    @Exported
+    public Throwable getException() {
+        return t;
+    }
 }
