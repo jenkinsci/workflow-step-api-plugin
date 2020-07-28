@@ -29,10 +29,15 @@ import hudson.ExtensionList;
 import hudson.model.Computer;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
@@ -41,12 +46,42 @@ import javax.annotation.Nonnull;
  * Pass into {@link BodyInvoker#withContext}.
  */
 public abstract class EnvironmentExpander implements Serializable {
+    private Map<String, String> watchedVars;
 
     /**
      * May add environment variables to a context.
      * @param env an original set of environment variables
      */
     public abstract void expand(@Nonnull EnvVars env) throws IOException, InterruptedException;
+
+    public void callback(PrintStream stream) {
+    }
+    public void watch(String var, String val) {
+        if (watchedVars == null) {
+            watchedVars = new HashMap<>();
+        }
+        watchedVars.put(var, val);
+    }
+    public void watchAll(Map<String, String> vars) {//Collection<?  extends String> vars) {
+        if (watchedVars == null) {
+            watchedVars = new HashMap<>();
+        }
+        watchedVars.putAll(vars);
+    }
+    @CheckForNull
+    public List<String> findWatchedVars(String text) {
+        if (watchedVars == null) {
+            return null;
+        }
+        return watchedVars.entrySet().stream()
+                .filter(e -> text.contains(e.getValue()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+    }
+    @CheckForNull
+    public Map<String, String> getWatchedVars() {
+        return watchedVars;
+    }
 
     /**
      * Provides an expander for a constant map of string keys and string values. Supports {@link EnvVars#override(String, String)}
@@ -91,6 +126,14 @@ public abstract class EnvironmentExpander implements Serializable {
         MergedEnvironmentExpander(EnvironmentExpander original, EnvironmentExpander subsequent) {
             this.original = original;
             this.subsequent = subsequent;
+//            List<String> originalWatch = original.getWatchList();
+//            List<String> subsequentWatch = subsequent.getWatchList();
+//            if (originalWatch != null) {
+//                this.watchAll(originalWatch);
+//            }
+//            if (subsequentWatch != null) {
+//                this.watchAll(subsequentWatch);
+//            }
         }
         @Override public void expand(EnvVars env) throws IOException, InterruptedException {
             original.expand(env);
@@ -142,5 +185,14 @@ public abstract class EnvironmentExpander implements Serializable {
         }
         return env;
     }
+
+//    public static void fireCallbacks(EnvironmentExpander expander) {
+//        if (expander instanceof MergedEnvironmentExpander) {
+//            EnvironmentExpander.fireCallbacks(((MergedEnvironmentExpander) expander).original);
+//            EnvironmentExpander.fireCallbacks(((MergedEnvironmentExpander) expander).subsequent);
+//        } else {
+//            expander.callback();
+//        }
+//    }
 
 }
