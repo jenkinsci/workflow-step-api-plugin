@@ -31,13 +31,12 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
@@ -46,7 +45,7 @@ import javax.annotation.Nonnull;
  * Pass into {@link BodyInvoker#withContext}.
  */
 public abstract class EnvironmentExpander implements Serializable {
-    private Map<String, String> watchedVars;
+    private Set<String> watchedVars;
 
     /**
      * May add environment variables to a context.
@@ -54,32 +53,21 @@ public abstract class EnvironmentExpander implements Serializable {
      */
     public abstract void expand(@Nonnull EnvVars env) throws IOException, InterruptedException;
 
-    public void callback(PrintStream stream) {
-    }
-    public void watch(String var, String val) {
+    public void watch(String var) {
         if (watchedVars == null) {
-            watchedVars = new HashMap<>();
+            watchedVars = new HashSet<>();
         }
-        watchedVars.put(var, val);
+        watchedVars.add(var);
     }
-    public void watchAll(Map<String, String> vars) {//Collection<?  extends String> vars) {
+    public void watchAll(Collection<?  extends String> vars) {
         if (watchedVars == null) {
-            watchedVars = new HashMap<>();
+            watchedVars = new HashSet<>();
         }
-        watchedVars.putAll(vars);
+        watchedVars.addAll(vars);
     }
+
     @CheckForNull
-    public List<String> findWatchedVars(String text) {
-        if (watchedVars == null) {
-            return null;
-        }
-        return watchedVars.entrySet().stream()
-                .filter(e -> text.contains(e.getValue()))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
-    }
-    @CheckForNull
-    public Map<String, String> getWatchedVars() {
+    public Set<String> getWatchedVars() {
         return watchedVars;
     }
 
@@ -126,15 +114,16 @@ public abstract class EnvironmentExpander implements Serializable {
         MergedEnvironmentExpander(EnvironmentExpander original, EnvironmentExpander subsequent) {
             this.original = original;
             this.subsequent = subsequent;
-//            List<String> originalWatch = original.getWatchList();
-//            List<String> subsequentWatch = subsequent.getWatchList();
-//            if (originalWatch != null) {
-//                this.watchAll(originalWatch);
-//            }
-//            if (subsequentWatch != null) {
-//                this.watchAll(subsequentWatch);
-//            }
+            Set<String> originalWatch = this.original.getWatchedVars();
+            Set<String> subsequentWatch = this.subsequent.getWatchedVars();
+            if (originalWatch != null)  {
+                watchAll(originalWatch);
+            }
+            if (subsequentWatch != null) {
+                watchAll(subsequentWatch);
+            }
         }
+
         @Override public void expand(EnvVars env) throws IOException, InterruptedException {
             original.expand(env);
             subsequent.expand(env);
@@ -185,14 +174,4 @@ public abstract class EnvironmentExpander implements Serializable {
         }
         return env;
     }
-
-//    public static void fireCallbacks(EnvironmentExpander expander) {
-//        if (expander instanceof MergedEnvironmentExpander) {
-//            EnvironmentExpander.fireCallbacks(((MergedEnvironmentExpander) expander).original);
-//            EnvironmentExpander.fireCallbacks(((MergedEnvironmentExpander) expander).subsequent);
-//        } else {
-//            expander.callback();
-//        }
-//    }
-
 }
