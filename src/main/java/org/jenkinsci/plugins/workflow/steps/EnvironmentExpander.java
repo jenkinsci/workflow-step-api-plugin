@@ -32,7 +32,7 @@ import hudson.model.TaskListener;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -45,7 +45,6 @@ import javax.annotation.Nonnull;
  * Pass into {@link BodyInvoker#withContext}.
  */
 public abstract class EnvironmentExpander implements Serializable {
-    private Set<String> watchedVars;
 
     /**
      * May add environment variables to a context.
@@ -53,22 +52,8 @@ public abstract class EnvironmentExpander implements Serializable {
      */
     public abstract void expand(@Nonnull EnvVars env) throws IOException, InterruptedException;
 
-    public void watch(String var) {
-        if (watchedVars == null) {
-            watchedVars = new HashSet<>();
-        }
-        watchedVars.add(var);
-    }
-    public void watchAll(Collection<?  extends String> vars) {
-        if (watchedVars == null) {
-            watchedVars = new HashSet<>();
-        }
-        watchedVars.addAll(vars);
-    }
-
-    @CheckForNull
     public Set<String> getWatchedVars() {
-        return watchedVars;
+        return Collections.emptySet();
     }
 
     /**
@@ -114,19 +99,25 @@ public abstract class EnvironmentExpander implements Serializable {
         MergedEnvironmentExpander(EnvironmentExpander original, EnvironmentExpander subsequent) {
             this.original = original;
             this.subsequent = subsequent;
-            Set<String> originalWatch = this.original.getWatchedVars();
-            Set<String> subsequentWatch = this.subsequent.getWatchedVars();
-            if (originalWatch != null)  {
-                watchAll(originalWatch);
-            }
-            if (subsequentWatch != null) {
-                watchAll(subsequentWatch);
-            }
         }
 
         @Override public void expand(EnvVars env) throws IOException, InterruptedException {
             original.expand(env);
             subsequent.expand(env);
+        }
+
+        @Override
+        public Set<String> getWatchedVars() {
+            Set<String> origWatch = original.getWatchedVars();
+            Set<String> subWatch = subsequent.getWatchedVars();
+            if (origWatch.isEmpty() && subWatch.isEmpty()) {
+                return Collections.emptySet();
+            } else {
+                Set<String> mergedWatch = new HashSet<>();
+                mergedWatch.addAll(origWatch);
+                mergedWatch.addAll(subWatch);
+                return mergedWatch;
+            }
         }
     }
 
