@@ -52,7 +52,12 @@ public abstract class EnvironmentExpander implements Serializable {
      */
     public abstract void expand(@Nonnull EnvVars env) throws IOException, InterruptedException;
 
-    public Set<String> getWatchedVars() {
+    /**
+     * Override this method to allow tracking of sensitive environment variables
+     *
+     * @return the set of sensitive environment variable names to track.
+     */
+    public Set<String> getSensitiveVars() {
         return Collections.emptySet();
     }
 
@@ -107,15 +112,15 @@ public abstract class EnvironmentExpander implements Serializable {
         }
 
         @Override
-        public Set<String> getWatchedVars() {
-            Set<String> origWatch = original.getWatchedVars();
-            Set<String> subWatch = subsequent.getWatchedVars();
-            if (origWatch.isEmpty() && subWatch.isEmpty()) {
+        public Set<String> getSensitiveVars() {
+            Set<String> originalSensitive = original.getSensitiveVars();
+            Set<String> subsequentSensitive = subsequent.getSensitiveVars();
+            if (originalSensitive.isEmpty() && subsequentSensitive.isEmpty()) {
                 return Collections.emptySet();
             } else {
                 Set<String> mergedWatch = new HashSet<>();
-                mergedWatch.addAll(origWatch);
-                mergedWatch.addAll(subWatch);
+                mergedWatch.addAll(originalSensitive);
+                mergedWatch.addAll(subsequentSensitive);
                 return mergedWatch;
             }
         }
