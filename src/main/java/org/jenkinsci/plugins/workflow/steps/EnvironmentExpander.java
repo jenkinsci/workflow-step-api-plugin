@@ -53,11 +53,12 @@ public abstract class EnvironmentExpander implements Serializable {
     public abstract void expand(@Nonnull EnvVars env) throws IOException, InterruptedException;
 
     /**
-     * Override this method to allow tracking of sensitive environment variables
+     * Get the names of environment variables known to contain sensitive values, such as secrets, in the current context.
+     * Should be overridden by subclasses that bind secret values to environment variables.
      *
-     * @return the set of sensitive environment variable names to track.
+     * @return a set of environment variables known to contain sensitive values
      */
-    public Set<String> getSensitiveVars() {
+    public @Nonnull Set<String> getSensitiveVariables() {
         return Collections.emptySet();
     }
 
@@ -112,9 +113,9 @@ public abstract class EnvironmentExpander implements Serializable {
         }
 
         @Override
-        public Set<String> getSensitiveVars() {
-            Set<String> originalSensitive = original.getSensitiveVars();
-            Set<String> subsequentSensitive = subsequent.getSensitiveVars();
+        public Set<String> getSensitiveVariables() {
+            Set<String> originalSensitive = original.getSensitiveVariables();
+            Set<String> subsequentSensitive = subsequent.getSensitiveVariables();
             if (originalSensitive.isEmpty() && subsequentSensitive.isEmpty()) {
                 return Collections.emptySet();
             } else {
