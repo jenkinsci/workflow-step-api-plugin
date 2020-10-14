@@ -1,5 +1,15 @@
 ## Changelog
 
+### 2.23
+
+Release date: 2020-10-14
+
+-   Internal: Use BOM. ([PR-54](https://github.com/jenkinsci/workflow-step-api-plugin/pull/54))
+-   Internal: Update minimum core version to 2.176.4 and parent POM. ([PR-56](https://github.com/jenkinsci/workflow-step-api-plugin/pull/56))
+-   Developer: Add API to look up registered sensitive variable names. Part of the fix for [JENKINS-47101](https://issues.jenkins-ci.org/browse/JENKINS-47101) and [JENKINS-63254](https://issues.jenkins-ci.org/browse/JENKINS-63254). ([PR 57](https://github.com/jenkinsci/workflow-step-api-plugin/pull/57))
+-   Internal: Use gitHubRepo for incrementals. See [JENKINS-58716](https://issues.jenkins-ci.org/browse/JENKINS-58716). ([PR-58](https://github.com/jenkinsci/workflow-step-api-plugin/pull/58))
+
+
 ### 2.22
 
 Release date: 2020-01-03
