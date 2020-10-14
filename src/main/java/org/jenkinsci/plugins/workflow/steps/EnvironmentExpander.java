@@ -29,10 +29,14 @@ import hudson.ExtensionList;
 import hudson.model.Computer;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
@@ -47,6 +51,16 @@ public abstract class EnvironmentExpander implements Serializable {
      * @param env an original set of environment variables
      */
     public abstract void expand(@Nonnull EnvVars env) throws IOException, InterruptedException;
+
+    /**
+     * Get the names of environment variables known to contain sensitive values, such as secrets, in the current context.
+     * Should be overridden by subclasses that bind secret values to environment variables.
+     *
+     * @return a set of environment variables known to contain sensitive values
+     */
+    public @Nonnull Set<String> getSensitiveVariables() {
+        return Collections.emptySet();
+    }
 
     /**
      * Provides an expander for a constant map of string keys and string values. Supports {@link EnvVars#override(String, String)}
@@ -92,9 +106,24 @@ public abstract class EnvironmentExpander implements Serializable {
             this.original = original;
             this.subsequent = subsequent;
         }
+
         @Override public void expand(EnvVars env) throws IOException, InterruptedException {
             original.expand(env);
             subsequent.expand(env);
+        }
+
+        @Override
+        public Set<String> getSensitiveVariables() {
+            Set<String> originalSensitive = original.getSensitiveVariables();
+            Set<String> subsequentSensitive = subsequent.getSensitiveVariables();
+            if (originalSensitive.isEmpty() && subsequentSensitive.isEmpty()) {
+                return Collections.emptySet();
+            } else {
+                Set<String> mergedWatch = new HashSet<>();
+                mergedWatch.addAll(originalSensitive);
+                mergedWatch.addAll(subsequentSensitive);
+                return mergedWatch;
+            }
         }
     }
 
@@ -142,5 +171,4 @@ public abstract class EnvironmentExpander implements Serializable {
         }
         return env;
     }
-
 }
