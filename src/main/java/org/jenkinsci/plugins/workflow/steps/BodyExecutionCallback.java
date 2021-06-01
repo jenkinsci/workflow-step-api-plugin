@@ -123,7 +123,7 @@ public abstract class BodyExecutionCallback implements Serializable {
             context.onSuccess(result);
         }
 
-        @Override public final void onFailure(StepContext context, Throwable t) {
+        @Override public void onFailure(StepContext context, Throwable t) {
             try {
                 finished(context);
             } catch (Exception x) {
