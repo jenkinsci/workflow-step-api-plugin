@@ -102,6 +102,10 @@ public final class FlowInterruptedException extends InterruptedException {
         return actualInterruption;
     }
 
+    public void setActualInterruption(boolean actualInterruption) {
+        this.actualInterruption = actualInterruption;
+    }
+
     private Object readResolve() {
         if (actualInterruption == null) {
             actualInterruption = true;
