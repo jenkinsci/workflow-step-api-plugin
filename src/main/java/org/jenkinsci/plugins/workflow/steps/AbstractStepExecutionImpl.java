@@ -45,6 +45,7 @@ public abstract class AbstractStepExecutionImpl extends StepExecution {
     // Cannot mark this @Deprecated without producing a warning for overriders.
     @Override
     public void onResume() {
+        // TODO do this only if using the deprecated constructor
         inject();
     }
 

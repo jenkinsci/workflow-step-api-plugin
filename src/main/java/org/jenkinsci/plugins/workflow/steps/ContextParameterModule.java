@@ -13,9 +13,6 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -23,8 +20,6 @@ import java.util.logging.Logger;
  */
 @Deprecated
 class ContextParameterModule extends AbstractModule {
-
-    private static final Logger LOGGER = Logger.getLogger(ContextParameterModule.class.getName());
 
     private final Step step;
     private final StepContext context;
@@ -44,36 +39,6 @@ class ContextParameterModule extends AbstractModule {
             for (Class c=step.getClass(); c!=Step.class; c=c.getSuperclass()) {
                 bind(c).toInstance(step);
             }
-        } else {
-            bindListener(Matchers.any(), new TypeListener() {
-                @Override public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
-                    for (final Field f : type.getRawType().getDeclaredFields()) {
-                        final Class<?> stepType = f.getType();
-                        if (Step.class.isAssignableFrom(stepType)) {
-                            encounter.register(new MembersInjector<I>() {
-                                @Override public void injectMembers(I instance) {
-                                    if (Modifier.isTransient(f.getModifiers())) {
-                                        try {
-                                            /*Constructor<?> stepCtor = */stepType.getConstructor();
-                                            /* does not work
-                                            f.setAccessible(true);
-                                            f.set(instance, stepCtor.newInstance());
-                                            */
-                                            LOGGER.log(Level.WARNING, "JENKINS-39134: {0} may not be marked @Inject; do not use AbstractStep'{',Execution,Descriptor'}'Impl", f);
-                                        } catch (NoSuchMethodException x) {
-                                            // fine, not a no-arg ctor, would not pose a problem anyway
-                                        /*
-                                        } catch (Exception x) {
-                                            throw new ProvisionException("failed to work around JENKINS-39134 on " + f, x);
-                                        */
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                    }
-                }
-            });
         }
 
         bindListener(Matchers.any(), new TypeListener() {
