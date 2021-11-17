@@ -63,14 +63,14 @@ public abstract class BodyInvoker {
     public abstract BodyInvoker withContext(Object override);
 
     /**
-     * Equivalent to calling {@link withContext} on each object.
+     * Equivalent to calling {@link #withContext} on each object.
      */
     public BodyInvoker withContexts(Object... overrides) {
         return withContexts(Arrays.asList(overrides));
     }
 
     /**
-     * Equivalent to calling {@link withContext} on each object.
+     * Equivalent to calling {@link #withContext} on each object.
      */
     public BodyInvoker withContexts(Collection<?> overrides) {
         for (Object o : overrides)
