@@ -5,7 +5,6 @@ import hudson.model.TaskListener;
 import hudson.model.Run;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -175,11 +174,11 @@ public class SynchronousNonBlockingStepExecutionTest {
         }
 
         @Override
-        public StepExecution start(StepContext context) throws Exception {
+        public StepExecution start(StepContext context) {
             return new StepExecutionImpl(this, context);
         }
 
-        public static void waitForStart(String id, Run<?,?> b) throws IOException, InterruptedException {
+        public static void waitForStart(String id, Run<?,?> b) throws InterruptedException {
             State s = State.get();
             synchronized (s) {
                 while (!s.started.contains(id)) {
@@ -267,14 +266,14 @@ public class SynchronousNonBlockingStepExecutionTest {
     }
     public static final class Erroneous extends Step {
         @DataBoundConstructor public Erroneous() {}
-        @Override public StepExecution start(StepContext context) throws Exception {
+        @Override public StepExecution start(StepContext context) {
             return new Exec(context);
         }
         private static final class Exec extends SynchronousNonBlockingStepExecution<Void> {
             Exec(StepContext context) {
                 super(context);
             }
-            @Override protected Void run() throws Exception {
+            @Override protected Void run() {
                 throw new AssertionError("ought to fail");
             }
         }
@@ -300,14 +299,14 @@ public class SynchronousNonBlockingStepExecutionTest {
     }
     public static final class CheckClassLoader extends Step {
         @DataBoundConstructor public CheckClassLoader() {}
-        @Override public StepExecution start(StepContext context) throws Exception {
+        @Override public StepExecution start(StepContext context) {
             return new Exec(context);
         }
         private static final class Exec extends SynchronousNonBlockingStepExecution<Void> {
             Exec(StepContext context) {
                 super(context);
             }
-            @Override protected Void run() throws Exception {
+            @Override protected Void run() {
                 if (Thread.currentThread().getContextClassLoader() == null) {
                     throw new AssertionError("Context class loader should not be null!");
                 }

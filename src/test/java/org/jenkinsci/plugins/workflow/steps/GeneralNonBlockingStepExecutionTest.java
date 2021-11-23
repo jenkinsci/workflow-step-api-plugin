@@ -142,7 +142,7 @@ public class GeneralNonBlockingStepExecutionTest {
 
     public static final class SlowBlockStep extends Step {
         @DataBoundConstructor public SlowBlockStep() {}
-        @Override public StepExecution start(StepContext context) throws Exception {
+        @Override public StepExecution start(StepContext context) {
             return new Execution(context, this);
         }
         private static final class Execution extends GeneralNonBlockingStepExecution {
