@@ -42,6 +42,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -253,7 +254,7 @@ public class DescribableHelper {
             for (Klass<?> c = Klass.java(type); c != null; c = c.getSuperClass()) {
                 URL u = c.getResource(parameter == null ? "help.html" : "help-" + parameter + ".html");
                 if (u != null) {
-                    return IOUtils.toString(u, "UTF-8");
+                    return IOUtils.toString(u, StandardCharsets.UTF_8);
                 }
             }
             return null;
