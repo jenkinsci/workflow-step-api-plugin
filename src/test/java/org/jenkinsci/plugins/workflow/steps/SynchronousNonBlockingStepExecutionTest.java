@@ -14,7 +14,7 @@ import java.util.Set;
 import jenkins.model.Jenkins;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
-import org.jenkinsci.plugins.workflow.cps.nodes.StepNode;
+import org.jenkinsci.plugins.workflow.graph.StepNode;
 import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -150,7 +150,7 @@ public class SynchronousNonBlockingStepExecutionTest {
         public static final class State {
             private static final Map<File,State> states = new HashMap<File,State>();
             static synchronized State get() {
-                File home = Jenkins.getActiveInstance().getRootDir();
+                File home = Jenkins.get().getRootDir();
                 State state = states.get(home);
                 if (state == null) {
                     state = new State();
