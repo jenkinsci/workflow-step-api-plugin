@@ -316,7 +316,7 @@ public class DescribableHelper {
                         for (Enum<?> value : c.asSubclass(Enum.class).getEnumConstants()) {
                             constants.add(value.name());
                         }
-                        return new EnumType(c, constants.toArray(new String[constants.size()]));
+                        return new EnumType(c, constants.toArray(new String[0]));
                     }
                     if (c == URL.class) {
                         return new AtomicType(String.class);
