@@ -334,10 +334,7 @@ public class DescribableHelper {
                         Map<String,List<Class<?>>> subtypesBySimpleName = new HashMap<>();
                         for (Class<?> subtype : subtypes) {
                             String simpleName = subtype.getSimpleName();
-                            List<Class<?>> bySimpleName = subtypesBySimpleName.get(simpleName);
-                            if (bySimpleName == null) {
-                                subtypesBySimpleName.put(simpleName, bySimpleName = new ArrayList<>());
-                            }
+                            List<Class<?>> bySimpleName = subtypesBySimpleName.computeIfAbsent(simpleName, unused -> new ArrayList<>());
                             bySimpleName.add(subtype);
                         }
                         Map<String,Schema> types = new TreeMap<>();
