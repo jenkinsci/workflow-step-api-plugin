@@ -76,9 +76,7 @@ class ContextParameterModule extends AbstractModule {
                         f.set(instance, context.get(f.getType()));
                     } catch (IllegalAccessException e) {
                         throw (Error) new IllegalAccessError(e.getMessage()).initCause(e);
-                    } catch (InterruptedException e) {
-                        throw new ProvisionException("Failed to set a context parameter", e);
-                    } catch (IOException e) {
+                    } catch (InterruptedException | IOException e) {
                         throw new ProvisionException("Failed to set a context parameter", e);
                     }
                 }
@@ -103,11 +101,7 @@ class ContextParameterModule extends AbstractModule {
                         m.invoke(instance, args);
                     } catch (IllegalAccessException e) {
                         throw (Error) new IllegalAccessError(e.getMessage()).initCause(e);
-                    } catch (InvocationTargetException e) {
-                        throw new ProvisionException("Failed to set a context parameter", e);
-                    } catch (InterruptedException e) {
-                        throw new ProvisionException("Failed to set a context parameter", e);
-                    } catch (IOException e) {
+                    } catch (InterruptedException | InvocationTargetException | IOException e) {
                         throw new ProvisionException("Failed to set a context parameter", e);
                     }
                 }
