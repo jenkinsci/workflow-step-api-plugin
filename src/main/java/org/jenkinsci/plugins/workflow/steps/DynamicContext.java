@@ -42,7 +42,7 @@ public interface DynamicContext extends ExtensionPoint {
     /**
      * Restricted version of {@link StepContext} used only for delegation in {@link #get(Class, DelegatedContext)}.
      */
-    public interface DelegatedContext {
+    interface DelegatedContext {
 
         /**
          * Look for objects of the same or another type defined in this context.
