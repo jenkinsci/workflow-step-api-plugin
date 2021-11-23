@@ -148,7 +148,7 @@ public class SynchronousNonBlockingStepExecutionTest {
     public static final class SynchronousNonBlockingStep extends Step implements Serializable {
 
         public static final class State {
-            private static final Map<File,State> states = new HashMap<File,State>();
+            private static final Map<File,State> states = new HashMap<>();
             static synchronized State get() {
                 File home = Jenkins.get().getRootDir();
                 State state = states.get(home);

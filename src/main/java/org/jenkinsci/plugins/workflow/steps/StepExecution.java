@@ -172,7 +172,7 @@ public abstract class StepExecution implements Serializable {
      * @see StepExecutionIterator
      */
     public static ListenableFuture<?> applyAll(Function<StepExecution,Void> f) {
-        List<ListenableFuture<?>> futures = new ArrayList<ListenableFuture<?>>();
+        List<ListenableFuture<?>> futures = new ArrayList<>();
         for (StepExecutionIterator i : StepExecutionIterator.all())
             futures.add(i.apply(f));
         return Futures.allAsList(futures);

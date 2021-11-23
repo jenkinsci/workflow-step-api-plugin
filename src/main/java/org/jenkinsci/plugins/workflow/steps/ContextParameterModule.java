@@ -46,12 +46,12 @@ class ContextParameterModule extends AbstractModule {
             public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
                 for (Field f : type.getRawType().getDeclaredFields()) {
                     if (f.isAnnotationPresent(StepContextParameter.class)) {
-                        encounter.register(new FieldInjector<I>(f));
+                        encounter.register(new FieldInjector<>(f));
                     }
                 }
                 for (Method m : type.getRawType().getDeclaredMethods()) {
                     if (m.isAnnotationPresent(StepContextParameter.class)) {
-                        encounter.register(new MethodInjector<I>(m));
+                        encounter.register(new MethodInjector<>(m));
                     }
                 }
             }
