@@ -1,7 +1,6 @@
 package org.jenkinsci.plugins.workflow.steps;
 
 import hudson.model.Executor;
-import hudson.model.Result;
 
 import static hudson.model.Result.ABORTED;
 import javax.annotation.Nonnull;
