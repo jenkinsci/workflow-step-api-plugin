@@ -42,6 +42,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -97,7 +98,7 @@ public class DescribableHelper {
      */
     public static <T> T instantiate(Class<? extends T> clazz, Map<String,?> arguments) throws Exception {
         String[] names = loadConstructorParamNames(clazz);
-        Constructor<T> c = DescribableHelper.<T>findConstructor(clazz, names.length);
+        Constructor<T> c = DescribableHelper.findConstructor(clazz, names.length);
         Object[] args = buildArguments(clazz, arguments, c.getGenericParameterTypes(), names, true);
         T o = c.newInstance(args);
         injectSetters(o, arguments);
@@ -112,7 +113,7 @@ public class DescribableHelper {
      */
     public static Map<String,Object> uninstantiate(Object o) throws UnsupportedOperationException {
         Class<?> clazz = o.getClass();
-        Map<String, Object> r = new TreeMap<String, Object>();
+        Map<String, Object> r = new TreeMap<>();
         String[] names;
         try {
             names = loadConstructorParamNames(clazz);
@@ -123,8 +124,8 @@ public class DescribableHelper {
             inspect(r, o, clazz, name);
         }
         r.values().removeAll(Collections.singleton(null));
-        Map<String,Object> constructorOnlyDataBoundProps = new TreeMap<String,Object>(r);
-        List<String> dataBoundSetters = new ArrayList<String>();
+        Map<String,Object> constructorOnlyDataBoundProps = new TreeMap<>(r);
+        List<String> dataBoundSetters = new ArrayList<>();
         for (Class<?> c = clazz; c != null; c = c.getSuperclass()) {
             for (Field f : c.getDeclaredFields()) {
                 if (f.isAnnotationPresent(DataBoundSetter.class)) {
@@ -167,7 +168,7 @@ public class DescribableHelper {
         private final List<String> mandatoryParameters;
 
         Schema(Class<?> clazz) {
-            this(clazz, new Stack<String>());
+            this(clazz, new Stack<>());
         }
 
         Schema(Class<?> clazz, @Nonnull Stack<String> tracker) {
@@ -175,8 +176,8 @@ public class DescribableHelper {
             /*if(tracker == null){
                 tracker = new Stack<String>();
             }*/
-            mandatoryParameters = new ArrayList<String>();
-            parameters = new TreeMap<String,ParameterType>();
+            mandatoryParameters = new ArrayList<>();
+            parameters = new TreeMap<>();
             String[] names = loadConstructorParamNames(clazz);
             Type[] types = findConstructor(clazz, names.length).getGenericParameterTypes();
             for (int i = 0; i < names.length; i++) {
@@ -253,7 +254,7 @@ public class DescribableHelper {
             for (Klass<?> c = Klass.java(type); c != null; c = c.getSuperClass()) {
                 URL u = c.getResource(parameter == null ? "help.html" : "help-" + parameter + ".html");
                 if (u != null) {
-                    return IOUtils.toString(u, "UTF-8");
+                    return IOUtils.toString(u, StandardCharsets.UTF_8);
                 }
             }
             return null;
@@ -262,7 +263,7 @@ public class DescribableHelper {
         @Override public String toString() {
             StringBuilder b = new StringBuilder("(");
             boolean first = true;
-            Map<String,ParameterType> params = new TreeMap<String,ParameterType>(parameters());
+            Map<String,ParameterType> params = new TreeMap<>(parameters());
             for (String param : mandatoryParameters()) {
                 if (first) {
                     first = false;
@@ -300,7 +301,7 @@ public class DescribableHelper {
         }
         
         static ParameterType of(Type type){
-            return of(type, new Stack<String>());
+            return of(type, new Stack<>());
         }
 
         private static ParameterType of(Type type, @Nonnull Stack<String> tracker) {
@@ -311,11 +312,11 @@ public class DescribableHelper {
                         return new AtomicType(c);
                     }
                     if (Enum.class.isAssignableFrom(c)) {
-                        List<String> constants = new ArrayList<String>();
+                        List<String> constants = new ArrayList<>();
                         for (Enum<?> value : c.asSubclass(Enum.class).getEnumConstants()) {
                             constants.add(value.name());
                         }
-                        return new EnumType(c, constants.toArray(new String[constants.size()]));
+                        return new EnumType(c, constants.toArray(new String[0]));
                     }
                     if (c == URL.class) {
                         return new AtomicType(String.class);
@@ -330,16 +331,13 @@ public class DescribableHelper {
                         return new HomogeneousObjectType(c);
                     } else {
                         // Definitely heterogeneous.
-                        Map<String,List<Class<?>>> subtypesBySimpleName = new HashMap<String,List<Class<?>>>();
+                        Map<String,List<Class<?>>> subtypesBySimpleName = new HashMap<>();
                         for (Class<?> subtype : subtypes) {
                             String simpleName = subtype.getSimpleName();
-                            List<Class<?>> bySimpleName = subtypesBySimpleName.get(simpleName);
-                            if (bySimpleName == null) {
-                                subtypesBySimpleName.put(simpleName, bySimpleName = new ArrayList<Class<?>>());
-                            }
+                            List<Class<?>> bySimpleName = subtypesBySimpleName.computeIfAbsent(simpleName, unused -> new ArrayList<>());
                             bySimpleName.add(subtype);
                         }
-                        Map<String,Schema> types = new TreeMap<String,Schema>();
+                        Map<String,Schema> types = new TreeMap<>();
                         for (Map.Entry<String,List<Class<?>>> entry : subtypesBySimpleName.entrySet()) {
                             if (entry.getValue().size() == 1) { // normal case: unambiguous via simple name
                                 try {
@@ -522,7 +520,7 @@ public class DescribableHelper {
             LOG.log(Level.WARNING, "Cannot create control version of " + clazz + " using " + constructorOnlyDataBoundProps, x);
             return;
         }
-        Map<String,Object> fromControl = new HashMap<String,Object>(constructorOnlyDataBoundProps);
+        Map<String,Object> fromControl = new HashMap<>(constructorOnlyDataBoundProps);
         Iterator<String> fields = dataBoundSetters.iterator();
         while (fields.hasNext()) {
             String field = fields.next();
@@ -572,7 +570,7 @@ public class DescribableHelper {
         if (type instanceof Class && Primitives.wrap((Class) type).isInstance(o)) {
             return o;
         } else if (o instanceof Map) {
-            Map<String,Object> m = new HashMap<String,Object>();
+            Map<String,Object> m = new HashMap<>();
             for (Map.Entry<?,?> entry : ((Map<?,?>) o).entrySet()) {
                 m.put((String) entry.getKey(), entry.getValue());
             }
@@ -629,7 +627,7 @@ public class DescribableHelper {
     }
 
     private static List<Object> mapList(String context, Type type, List<?> list) throws Exception {
-        List<Object> r = new ArrayList<Object>();
+        List<Object> r = new ArrayList<>();
         for (Object elt : list) {
             r.add(coerce(context, type, elt));
         }
@@ -691,7 +689,7 @@ public class DescribableHelper {
     }
 
     private static void inspect(Map<String, Object> r, Object o, Class<?> clazz, String field) {
-        AtomicReference<Type> type = new AtomicReference<Type>();
+        AtomicReference<Type> type = new AtomicReference<>();
         Object value = inspect(o, clazz, field, type);
         try {
             String[] names = loadConstructorParamNames(clazz);
@@ -717,14 +715,14 @@ public class DescribableHelper {
         } else if ((type == Character.class || type == char.class) && o instanceof Character) {
             return ((Character) o).toString();
         } else if (o instanceof Object[]) {
-            List<Object> list = new ArrayList<Object>();
+            List<Object> list = new ArrayList<>();
             Object[] array = (Object[]) o;
             for (Object elt : array) {
                 list.add(uncoerce(elt, array.getClass().getComponentType()));
             }
             return list;
         } else if (o instanceof List && acceptsList(type)) {
-            List<Object> list = new ArrayList<Object>();
+            List<Object> list = new ArrayList<>();
             for (Object elt : (List<?>) o) {
                 list.add(uncoerce(elt, ((ParameterizedType) type).getActualTypeArguments()[0]));
             }
@@ -777,7 +775,7 @@ public class DescribableHelper {
     }
 
     static Set<Class<?>> findSubtypes(Class<?> supertype) {
-        Set<Class<?>> clazzes = new HashSet<Class<?>>();
+        Set<Class<?>> clazzes = new HashSet<>();
         for (Descriptor<?> d : getDescriptorList()) {
             if (supertype.isAssignableFrom(d.clazz)) {
                 clazzes.add(d.clazz);
@@ -810,7 +808,7 @@ public class DescribableHelper {
             return j.getExtensionList(Descriptor.class);
         } else {
             // TODO should be part of ExtensionList.lookup in core, but here now for benefit of tests:
-            List<Descriptor<?>> descriptors = new ArrayList<Descriptor<?>>();
+            List<Descriptor<?>> descriptors = new ArrayList<>();
             for (IndexItem<Extension,Object> item : Index.load(Extension.class, Object.class)) {
                 try {
                     Object o = item.instance();

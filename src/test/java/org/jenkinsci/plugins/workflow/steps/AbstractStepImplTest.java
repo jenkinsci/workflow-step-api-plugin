@@ -99,7 +99,7 @@ public class AbstractStepImplTest {
         Node n;
 
         @Override
-        protected Void run() throws Exception {
+        protected Void run() {
             assertSame(jenkins, Jenkins.getInstance());
             assertSame(n, Jenkins.getInstance());
             return null;

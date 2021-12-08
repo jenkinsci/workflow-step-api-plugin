@@ -24,24 +24,27 @@
 
 package org.jenkinsci.plugins.workflow.steps;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.junit.Assert.assertTrue;
+
 import hudson.model.Result;
 import hudson.model.TaskListener;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
-import static org.hamcrest.Matchers.*;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowExecution;
 import org.jenkinsci.plugins.workflow.cps.CpsStepContext;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.test.steps.SemaphoreStep;
-import org.junit.ClassRule;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
+import org.junit.Test;
 import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -142,7 +145,7 @@ public class GeneralNonBlockingStepExecutionTest {
 
     public static final class SlowBlockStep extends Step {
         @DataBoundConstructor public SlowBlockStep() {}
-        @Override public StepExecution start(StepContext context) throws Exception {
+        @Override public StepExecution start(StepContext context) {
             return new Execution(context, this);
         }
         private static final class Execution extends GeneralNonBlockingStepExecution {

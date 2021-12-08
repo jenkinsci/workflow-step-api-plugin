@@ -50,7 +50,7 @@ public class MissingContextVariableException extends Exception {
      * exclude them
      */
     public @Nonnull List<StepDescriptor> getProviders() {
-        List<StepDescriptor> r = new ArrayList<StepDescriptor>();
+        List<StepDescriptor> r = new ArrayList<>();
         for (StepDescriptor sd : StepDescriptor.all()) {
             if (isIn(sd.getProvidedContext()) && !isIn(sd.getRequiredContext()))
                 r.add(sd);
