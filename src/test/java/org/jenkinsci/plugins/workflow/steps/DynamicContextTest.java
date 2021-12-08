@@ -33,6 +33,7 @@ public class DynamicContextTest {
     @Test public void subclassing() throws Exception {
         class Super {}
         class Sub extends Super {}
+        class Sub2 extends Super {}
         DynamicContext.DelegatedContext nullContext = new DynamicContext.DelegatedContext() {
             @Override public <T> T get(Class<T> key) throws IOException, InterruptedException {
                 return null;
@@ -49,6 +50,8 @@ public class DynamicContextTest {
         DynamicContext ctx = new Dyn();
         assertNotNull("can look up via superclass", ctx.get(Super.class, nullContext));
         assertNotNull("can look up via subclass", ctx.get(Sub.class, nullContext));
+        assertNull("but not via an unrelated subclass", ctx.get(Sub2.class, nullContext));
+        assertNull("nor via an unrelated superclass", ctx.get(Runnable.class, nullContext));
     }
 
 }
