@@ -25,7 +25,6 @@
 package org.jenkinsci.plugins.workflow.steps;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.ExtensionList;
@@ -66,7 +65,7 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      * if your step cannot trivially handle a null value of a given kind, list that type here.
      * The Pipeline execution engine will then signal a user error before even starting your step if called in an inappropriate context.
      * For example, a step requesting a {@link Launcher} may only be run inside a {@code node {…}} block.
-     * @return typically an {@link ImmutableSet#of(Object)} with context types like {@link TaskListener} or {@link Run} or {@link FilePath}
+     * @return a set of context types like {@link TaskListener} or {@link Run} or {@link FilePath}
      */
     public abstract Set<? extends Class<?>> getRequiredContext();
 

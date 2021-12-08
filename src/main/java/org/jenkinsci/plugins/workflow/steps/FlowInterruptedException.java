@@ -24,7 +24,6 @@
 
 package org.jenkinsci.plugins.workflow.steps;
 
-import com.google.common.collect.Sets;
 import hudson.AbortException;
 import hudson.Functions;
 import hudson.model.Executor;
@@ -121,7 +120,8 @@ public final class FlowInterruptedException extends InterruptedException {
         for (InterruptedBuildAction a : run.getActions(InterruptedBuildAction.class)) {
             boundCauses.addAll(a.getCauses());
         }
-        Collection<CauseOfInterruption> diff = Sets.difference(new LinkedHashSet<>(causes), boundCauses);
+        Set<CauseOfInterruption> diff = new LinkedHashSet<>(causes);
+        diff.removeAll(boundCauses);
         if (!diff.isEmpty()) {
             run.addAction(new InterruptedBuildAction(diff));
             for (CauseOfInterruption cause : diff) {
