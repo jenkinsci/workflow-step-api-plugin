@@ -1,9 +1,5 @@
 # Pipeline: Step API Plugin
 
-[![Jenkins Plugin](https://img.shields.io/jenkins/plugin/v/workflow-step-api)](https://plugins.jenkins.io/workflow-step-api)
-[![Changelog](https://img.shields.io/github/v/tag/jenkinsci/workflow-step-api-plugin?label=changelog)](https://github.com/jenkinsci/workflow-step-api-plugin/blob/master/CHANGELOG.md)
-[![Jenkins Plugin Installs](https://img.shields.io/jenkins/plugin/i/workflow-step-api?color=blue)](https://plugins.jenkins.io/workflow-step-api)
-
 ## Developer Guide: Writing Pipeline steps
 
 Plugins can implement custom Pipeline steps with specialized behavior by adding a dependency on `workflow-step-api`.
