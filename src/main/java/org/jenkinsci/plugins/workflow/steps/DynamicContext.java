@@ -89,9 +89,17 @@ public interface DynamicContext extends ExtensionPoint {
          */
         protected abstract @CheckForNull T get(DelegatedContext context) throws IOException, InterruptedException;
 
-        @Override public final <T> T get(Class<T> key, DelegatedContext context) throws IOException, InterruptedException {
-            if (key.isAssignableFrom(type())) {
+        @Override public final <U> U get(Class<U> key, DelegatedContext context) throws IOException, InterruptedException {
+            Class<T> type = type();
+            if (key.isAssignableFrom(type)) {
                 return key.cast(get(context));
+            } else if (type.isAssignableFrom(key)) {
+                T t = get(context);
+                if (key.isInstance(t)) {
+                    return key.cast(t);
+                } else {
+                    return null;
+                }
             } else {
                 return null;
             }
