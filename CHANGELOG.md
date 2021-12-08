@@ -1,5 +1,7 @@
 ## Changelog
 
+- For newer versions, see [GitHub Releases](https://github.com/jenkinsci/workflow-step-api-plugin/releases)
+
 ### 2.24
 
 Release date: 2021-07-12
