@@ -48,10 +48,10 @@ public class DynamicContextTest {
             }
         }
         DynamicContext ctx = new Dyn();
-        assertNotNull("can look up via superclass", ctx.get(Super.class, nullContext));
-        assertNotNull("can look up via subclass", ctx.get(Sub.class, nullContext));
-        assertNull("but not via an unrelated subclass", ctx.get(Sub2.class, nullContext));
-        assertNull("nor via an unrelated superclass", ctx.get(Runnable.class, nullContext));
+        assertNotNull("can look up via supertype", ctx.get(Super.class, nullContext));
+        assertNotNull("can look up via subtype", ctx.get(Sub.class, nullContext));
+        assertNull("but not via a mismatched subtype", ctx.get(Sub2.class, nullContext));
+        assertNull("nor via an unrelated supertype", ctx.get(Runnable.class, nullContext));
     }
 
 }
