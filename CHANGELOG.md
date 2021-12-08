@@ -6,7 +6,7 @@
 
 Release date: 2021-07-12
 
--   Bug: Pipeline retry operation doesn't retry when there is a tieout inside of it. ([JENKINS-51454](https://issues.jenkins-ci.org/browse/JENKINS-51454))([PR 61](https://github.com/jenkinsci/workflow-step-api-plugin/pull/61))
+-   Bug: Pipeline retry operation doesn't retry when there is a timeout inside of it. ([JENKINS-51454](https://issues.jenkins-ci.org/browse/JENKINS-51454))([PR 61](https://github.com/jenkinsci/workflow-step-api-plugin/pull/61))
 
 ### 2.23
 
