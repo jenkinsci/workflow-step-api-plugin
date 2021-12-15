@@ -112,6 +112,8 @@ public abstract class StepExecution implements Serializable {
     /**
      * Called when {@link StepExecution} is brought back into memory after restart.
      * Convenient for re-establishing the polling.
+     * <p>Currently not permitted to throw exceptions, but may report errors via {@link StepContext#onFailure}.
+     * @see SynchronousResumeNotSupportedException
      */
     public void onResume() {}
 
