@@ -67,7 +67,7 @@ public abstract class AbstractSynchronousNonBlockingStepExecution<T> extends Abs
 
     @Override
     public void onResume() {
-        getContext().onFailure(new Exception("Resume after a restart not supported for non-blocking synchronous steps"));
+        getContext().onFailure(new SynchronousResumeNotSupportedException());
     }
 
     @Override public @Nonnull String getStatus() {

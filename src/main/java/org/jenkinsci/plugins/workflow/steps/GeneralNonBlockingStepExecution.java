@@ -104,7 +104,7 @@ public abstract class GeneralNonBlockingStepExecution extends StepExecution {
     @Override
     public void onResume() {
         if (threadName != null) {
-            getContext().onFailure(new Exception("Resume after a restart not supported while running background code"));
+            getContext().onFailure(new SynchronousResumeNotSupportedException());
         }
     }
 
