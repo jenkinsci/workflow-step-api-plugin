@@ -42,9 +42,9 @@ import org.jenkinsci.plugins.structs.describable.DescribableParameter;
 import org.jenkinsci.plugins.structs.describable.UninstantiatedDescribable;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -311,7 +311,7 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      *
      * When the returned list is bigger than size 1, it means there's ambiguity in how to process it.
      */
-    public static @Nonnull List<StepDescriptor> metaStepsOf(String symbol) {
+    public static @NonNull List<StepDescriptor> metaStepsOf(String symbol) {
         List<StepDescriptor> r = new ArrayList<>();
         // honor ordinals among meta-steps
         for (StepDescriptor d : StepDescriptor.allMeta()) {
@@ -338,7 +338,7 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      * @return Formatted string, before escaping, or null if can't be converted easily to a String.
      */
     @CheckForNull
-    public String argumentsToString(@Nonnull Map<String, Object> namedArgs) {
+    public String argumentsToString(@NonNull Map<String, Object> namedArgs) {
         if (namedArgs.size() == 1) {
             Object val = namedArgs.values().iterator().next();
             return (isAbleToUseToStringForDisplay(val)) ? val.toString() : null;

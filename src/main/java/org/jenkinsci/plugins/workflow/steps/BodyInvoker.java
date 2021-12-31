@@ -36,8 +36,8 @@ import java.io.Serializable;
 
 import java.util.Arrays;
 import java.util.Collection;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * Builder pattern for controlling how to execute a body block of a {@link Step}.
@@ -85,7 +85,7 @@ public abstract class BodyInvoker {
      *
      * @return this object
      */
-    public abstract BodyInvoker withDisplayName(@Nonnull String name);
+    public abstract BodyInvoker withDisplayName(@NonNull String name);
 
     /**
      * Registers a callback that tracks the progress of the body execution.
@@ -115,7 +115,7 @@ public abstract class BodyInvoker {
      * @return a merge of the two, or just yours if there was no original
      * @see #withContext
      */
-    public static ConsoleLogFilter mergeConsoleLogFilters(@CheckForNull ConsoleLogFilter original, @Nonnull ConsoleLogFilter subsequent) {
+    public static ConsoleLogFilter mergeConsoleLogFilters(@CheckForNull ConsoleLogFilter original, @NonNull ConsoleLogFilter subsequent) {
         if (original == null) {
             return subsequent;
         }
@@ -141,7 +141,7 @@ public abstract class BodyInvoker {
      * @return a merge of the two, or just yours if there was no original
      * @see #withContext
      */
-    public static LauncherDecorator mergeLauncherDecorators(@CheckForNull LauncherDecorator original, @Nonnull LauncherDecorator subsequent) {
+    public static LauncherDecorator mergeLauncherDecorators(@CheckForNull LauncherDecorator original, @NonNull LauncherDecorator subsequent) {
         if (original == null) {
             return subsequent;
         }

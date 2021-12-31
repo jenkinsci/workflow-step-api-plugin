@@ -3,7 +3,7 @@ package org.jenkinsci.plugins.workflow.steps;
 import hudson.model.Executor;
 
 import static hudson.model.Result.ABORTED;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * {@link StepExecution} that always executes synchronously. This API should be used for short-lived tasks that
@@ -19,7 +19,7 @@ import javax.annotation.Nonnull;
 public abstract class SynchronousStepExecution<T> extends StepExecution {
     private transient volatile Thread executing;
 
-    protected SynchronousStepExecution(@Nonnull StepContext context) {
+    protected SynchronousStepExecution(@NonNull StepContext context) {
         super(context);
     }
 

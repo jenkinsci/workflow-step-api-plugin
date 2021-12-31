@@ -8,7 +8,7 @@ import hudson.util.NamingThreadFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.Jenkins;
 import org.acegisecurity.Authentication;
 
@@ -25,7 +25,7 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
 
     private static ExecutorService executorService;
 
-    protected SynchronousNonBlockingStepExecution(@Nonnull StepContext context) {
+    protected SynchronousNonBlockingStepExecution(@NonNull StepContext context) {
         super(context);
     }
 
@@ -75,7 +75,7 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
         getContext().onFailure(new SynchronousResumeNotSupportedException());
     }
 
-    @Override public @Nonnull String getStatus() {
+    @Override public @NonNull String getStatus() {
         if (threadName != null) {
             return "running in thread: " + threadName;
         } else {

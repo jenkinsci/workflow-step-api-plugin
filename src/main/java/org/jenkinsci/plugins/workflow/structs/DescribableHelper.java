@@ -58,8 +58,8 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.Jenkins;
 import net.java.sezpoz.Index;
 import net.java.sezpoz.IndexItem;
@@ -171,7 +171,7 @@ public class DescribableHelper {
             this(clazz, new Stack<>());
         }
 
-        Schema(Class<?> clazz, @Nonnull Stack<String> tracker) {
+        Schema(Class<?> clazz, @NonNull Stack<String> tracker) {
             this.type = clazz;
             /*if(tracker == null){
                 tracker = new Stack<String>();
@@ -289,7 +289,7 @@ public class DescribableHelper {
      * A type of a parameter to a class.
      */
     public static abstract class ParameterType {
-        @Nonnull
+        @NonNull
         private final Type actualType;
 
         public Type getActualType() {
@@ -304,7 +304,7 @@ public class DescribableHelper {
             return of(type, new Stack<>());
         }
 
-        private static ParameterType of(Type type, @Nonnull Stack<String> tracker) {
+        private static ParameterType of(Type type, @NonNull Stack<String> tracker) {
             try {
                 if (type instanceof Class) {
                     Class<?> c = (Class<?>) type;
@@ -555,7 +555,7 @@ public class DescribableHelper {
             } else if (type instanceof Class && ((Class) type).isPrimitive() && callEvenIfNoArgs) {
                 throw new UnsupportedOperationException("not yet handling @DataBoundConstructor default value of " + type + "; pass an explicit value for " + name);
             } else {
-                // TODO this might be fine (ExecutorStep.label), or not (GenericSCMStep.scm); should inspect parameter annotations for @Nonnull and throw an UOE if found
+                // TODO this might be fine (ExecutorStep.label), or not (GenericSCMStep.scm); should inspect parameter annotations for @NonNull and throw an UOE if found
             }
         }
         return hasArg ? args : null;
@@ -563,7 +563,7 @@ public class DescribableHelper {
 
     @SuppressFBWarnings(value="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification="new Jenkins.getInstance")
     @SuppressWarnings("unchecked")
-    private static Object coerce(String context, Type type, @Nonnull Object o) throws Exception {
+    private static Object coerce(String context, Type type, @NonNull Object o) throws Exception {
         if (type instanceof Class) {
             o = ReflectionCache.getCachedClass((Class) type).coerceArgument(o);
         }

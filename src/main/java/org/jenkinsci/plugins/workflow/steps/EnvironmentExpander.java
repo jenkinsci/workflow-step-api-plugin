@@ -37,8 +37,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * Interface destined for {@link StepContext#get} instead of raw {@link EnvVars}.
@@ -50,7 +50,7 @@ public abstract class EnvironmentExpander implements Serializable {
      * May add environment variables to a context.
      * @param env an original set of environment variables
      */
-    public abstract void expand(@Nonnull EnvVars env) throws IOException, InterruptedException;
+    public abstract void expand(@NonNull EnvVars env) throws IOException, InterruptedException;
 
     /**
      * Get the names of environment variables known to contain sensitive values, such as secrets, in the current context.
@@ -58,7 +58,7 @@ public abstract class EnvironmentExpander implements Serializable {
      *
      * @return a set of environment variables known to contain sensitive values
      */
-    public @Nonnull Set<String> getSensitiveVariables() {
+    public @NonNull Set<String> getSensitiveVariables() {
         return Collections.emptySet();
     }
 
@@ -69,7 +69,7 @@ public abstract class EnvironmentExpander implements Serializable {
      * @param env A non-null map of string keys and string values.
      * @return An expander which will provide the given map.
      */
-    public static EnvironmentExpander constant(@Nonnull Map<String,String> env) {
+    public static EnvironmentExpander constant(@NonNull Map<String,String> env) {
         return new ConstantEnvironmentExpander(env);
     }
 
@@ -77,7 +77,7 @@ public abstract class EnvironmentExpander implements Serializable {
         private static final long serialVersionUID = 1;
         private final Map<String,String> envMap;
 
-        ConstantEnvironmentExpander(@Nonnull Map<String,String> envMap) {
+        ConstantEnvironmentExpander(@NonNull Map<String,String> envMap) {
             this.envMap = new HashMap<>();
             this.envMap.putAll(envMap);
         }
@@ -93,7 +93,7 @@ public abstract class EnvironmentExpander implements Serializable {
      * @param subsequent what you are adding
      * @return an expander which runs them both in that sequence (or, as a convenience, just {@code subsequent} in case {@code original} is null)
      */
-    public static EnvironmentExpander merge(@CheckForNull EnvironmentExpander original, @Nonnull EnvironmentExpander subsequent) {
+    public static EnvironmentExpander merge(@CheckForNull EnvironmentExpander original, @NonNull EnvironmentExpander subsequent) {
         if (original == null) {
             return subsequent;
         }
@@ -101,7 +101,7 @@ public abstract class EnvironmentExpander implements Serializable {
     }
     private static class MergedEnvironmentExpander extends EnvironmentExpander {
         private static final long serialVersionUID = 1;
-        private final @Nonnull EnvironmentExpander original, subsequent;
+        private final @NonNull EnvironmentExpander original, subsequent;
         MergedEnvironmentExpander(EnvironmentExpander original, EnvironmentExpander subsequent) {
             this.original = original;
             this.subsequent = subsequent;
@@ -131,7 +131,7 @@ public abstract class EnvironmentExpander implements Serializable {
      * @deprecated Use {@link #getEffectiveEnvironment(EnvVars, EnvVars, EnvironmentExpander, StepContext, TaskListener)} to allow {@link StepEnvironmentContributor}s to run.
      */
     @Deprecated
-    public static @Nonnull EnvVars getEffectiveEnvironment(@Nonnull EnvVars customEnvironment, @CheckForNull EnvVars contextualEnvironment, @CheckForNull EnvironmentExpander expander) throws IOException, InterruptedException {
+    public static @NonNull EnvVars getEffectiveEnvironment(@NonNull EnvVars customEnvironment, @CheckForNull EnvVars contextualEnvironment, @CheckForNull EnvironmentExpander expander) throws IOException, InterruptedException {
         return getEffectiveEnvironment(customEnvironment, contextualEnvironment, expander, null, TaskListener.NULL);
     }
 
@@ -152,7 +152,7 @@ public abstract class EnvironmentExpander implements Serializable {
      * @param listener Connected to the build console. Can be used to report errors.
      * @return the effective environment
      */
-    public static @Nonnull EnvVars getEffectiveEnvironment(@Nonnull EnvVars customEnvironment, @CheckForNull EnvVars contextualEnvironment, @CheckForNull EnvironmentExpander expander, @CheckForNull StepContext stepContext, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    public static @NonNull EnvVars getEffectiveEnvironment(@NonNull EnvVars customEnvironment, @CheckForNull EnvVars contextualEnvironment, @CheckForNull EnvironmentExpander expander, @CheckForNull StepContext stepContext, @NonNull TaskListener listener) throws IOException, InterruptedException {
         EnvVars env;
         if (contextualEnvironment != null) {
             env = new EnvVars(contextualEnvironment);

@@ -4,7 +4,7 @@ import hudson.EnvVars;
 import hudson.ExtensionPoint;
 import hudson.model.TaskListener;
 import java.io.IOException;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * Contributes environment variables to workflow steps.
@@ -43,5 +43,5 @@ public abstract class StepEnvironmentContributor implements ExtensionPoint {
    * @param listener
    *      Connected to the build console. Can be used to report errors.
    */
-  public void buildEnvironmentFor(@Nonnull StepContext stepContext, @Nonnull EnvVars envs, @Nonnull TaskListener listener) throws IOException, InterruptedException {}
+  public void buildEnvironmentFor(@NonNull StepContext stepContext, @NonNull EnvVars envs, @NonNull TaskListener listener) throws IOException, InterruptedException {}
 }

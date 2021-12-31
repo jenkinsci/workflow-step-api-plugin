@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.workflow.steps;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -15,9 +15,9 @@ import java.util.Set;
  * TODO: extend from AbortException if it's not final
  */
 public class MissingContextVariableException extends Exception {
-    private final @Nonnull Class<?> type;
+    private final @NonNull Class<?> type;
 
-    public MissingContextVariableException(@Nonnull Class<?> type) {
+    public MissingContextVariableException(@NonNull Class<?> type) {
         this.type = type;
     }
 
@@ -49,7 +49,7 @@ public class MissingContextVariableException extends Exception {
      * decorates/modifies the existing context, so we check required context as well to
      * exclude them
      */
-    public @Nonnull List<StepDescriptor> getProviders() {
+    public @NonNull List<StepDescriptor> getProviders() {
         List<StepDescriptor> r = new ArrayList<>();
         for (StepDescriptor sd : StepDescriptor.all()) {
             if (isIn(sd.getProvidedContext()) && !isIn(sd.getRequiredContext()))
