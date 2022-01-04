@@ -30,8 +30,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
@@ -46,7 +46,7 @@ public class StaplerReferer {
 
     private static final Pattern REFERER = Pattern.compile(".+?((/job/[^/]+)+)/.+");
 
-    static @CheckForNull String itemFromReferer(@Nonnull String referer) {
+    static @CheckForNull String itemFromReferer(@NonNull String referer) {
         Matcher m = REFERER.matcher(referer);
         if (m.matches()) {
             return URI.create(m.group(1).replace("/job/", "/")).getPath().substring(1);

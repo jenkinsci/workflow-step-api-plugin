@@ -26,9 +26,9 @@ package org.jenkinsci.plugins.workflow.steps;
 
 import hudson.ExtensionPoint;
 import java.io.IOException;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 
 /**
  * Allows {@link StepContext#get} to provide a dynamically computed value.
@@ -82,7 +82,7 @@ public interface DynamicContext extends ExtensionPoint {
         /**
          * A type token.
          */
-        protected abstract @Nonnull Class<T> type();
+        protected abstract @NonNull Class<T> type();
 
         /**
          * As {@link #get(Class, DelegatedContext)}.

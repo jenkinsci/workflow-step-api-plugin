@@ -3,7 +3,7 @@ package org.jenkinsci.plugins.workflow.steps;
 import com.google.inject.Injector;
 import jenkins.model.Jenkins;
 
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import javax.inject.Inject;
 
 /**

@@ -36,8 +36,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.CauseOfInterruption;
 import jenkins.model.InterruptedBuildAction;
 
@@ -55,8 +55,8 @@ public final class FlowInterruptedException extends InterruptedException {
 
     private static final long serialVersionUID = 630482382622970136L;
 
-    private final @Nonnull Result result;
-    private final @Nonnull List<CauseOfInterruption> causes;
+    private final @NonNull Result result;
+    private final @NonNull List<CauseOfInterruption> causes;
     /**
      * If true, this exception represents an actual build interruption, rather than a general error with a result and
      * no stack trace.
@@ -71,7 +71,7 @@ public final class FlowInterruptedException extends InterruptedException {
      * @param result the desired result for the flow, typically {@link Result#ABORTED}
      * @param causes any indications
      */
-    public FlowInterruptedException(@Nonnull Result result, @Nonnull CauseOfInterruption... causes) {
+    public FlowInterruptedException(@NonNull Result result, @NonNull CauseOfInterruption... causes) {
         this.result = result;
         this.causes = Arrays.asList(causes);
         this.actualInterruption = true;
@@ -83,17 +83,17 @@ public final class FlowInterruptedException extends InterruptedException {
      * @param causes any indications
      * @param actualInterruption true if this is an actual build interruption (e.g. the user wants to abort the build)
      */
-    public FlowInterruptedException(@Nonnull Result result, boolean actualInterruption, @Nonnull CauseOfInterruption... causes) {
+    public FlowInterruptedException(@NonNull Result result, boolean actualInterruption, @NonNull CauseOfInterruption... causes) {
         this.result = result;
         this.causes = Arrays.asList(causes);
         this.actualInterruption = actualInterruption;
     }
 
-    public @Nonnull Result getResult() {
+    public @NonNull Result getResult() {
         return result;
     }
 
-    public @Nonnull List<CauseOfInterruption> getCauses() {
+    public @NonNull List<CauseOfInterruption> getCauses() {
         return causes;
     }
 
@@ -133,7 +133,7 @@ public final class FlowInterruptedException extends InterruptedException {
             print(t, run, listener);
         }
     }
-    private static void print(@CheckForNull Throwable t, Run<?,?> run, @Nonnull TaskListener listener) {
+    private static void print(@CheckForNull Throwable t, Run<?,?> run, @NonNull TaskListener listener) {
         if (t instanceof AbortException) {
             listener.getLogger().println(t.getMessage());
         } else if (t instanceof FlowInterruptedException) {

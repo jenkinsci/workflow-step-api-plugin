@@ -28,7 +28,7 @@ import hudson.security.ACL;
 import hudson.security.ACLContext;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.Jenkins;
 import org.acegisecurity.Authentication;
 
@@ -108,7 +108,7 @@ public abstract class GeneralNonBlockingStepExecution extends StepExecution {
         }
     }
 
-    @Override public @Nonnull String getStatus() {
+    @Override public @NonNull String getStatus() {
         if (threadName != null) {
             return "running in thread: " + threadName;
         } else {

@@ -12,8 +12,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import javax.inject.Inject;
 import jenkins.model.queue.AsynchronousExecution;
 import jenkins.util.Timer;
@@ -47,11 +47,11 @@ public abstract class StepExecution implements Serializable {
     /**
      * If manually created, {@link StepContext} must be passed in.
      */
-    protected StepExecution(@Nonnull StepContext context) {
+    protected StepExecution(@NonNull StepContext context) {
         this.context = context;
     }
 
-    public @Nonnull StepContext getContext() {
+    public @NonNull StepContext getContext() {
         if (context == null) {
             throw new IllegalStateException("you must either pass in a StepContext to the StepExecution constructor, or have the StepExecution be created automatically");
         }
@@ -105,7 +105,7 @@ public abstract class StepExecution implements Serializable {
      *      Contextual information that lets the step know what resulted in stopping an executing step,
      *      passed in the hope that this will assist diagnostics.
      */
-    public void stop(@Nonnull Throwable cause) throws Exception {
+    public void stop(@NonNull Throwable cause) throws Exception {
         getContext().onFailure(cause);
     }
 

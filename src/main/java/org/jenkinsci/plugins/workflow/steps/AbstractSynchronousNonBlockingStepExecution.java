@@ -3,7 +3,7 @@ package org.jenkinsci.plugins.workflow.steps;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.security.ACL;
 import java.util.concurrent.Future;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.Jenkins;
 import jenkins.security.NotReallyRoleSensitiveCallable;
 import org.acegisecurity.Authentication;
@@ -70,7 +70,7 @@ public abstract class AbstractSynchronousNonBlockingStepExecution<T> extends Abs
         getContext().onFailure(new SynchronousResumeNotSupportedException());
     }
 
-    @Override public @Nonnull String getStatus() {
+    @Override public @NonNull String getStatus() {
         if (threadName != null) {
             return "running in thread: " + threadName;
         } else {
