@@ -57,7 +57,7 @@ public abstract class StepContext implements FutureCallback<Object>, Serializabl
      * <dt>{@link Launcher} <dd>a way to fork processes
      * <dt>{@link EnvVars} <dd>read access to environment variables associated with a run, typically used for launchers
      * <dt>{@link FilePath} <dd>a “workspace” to use for example as from {@link hudson.Launcher.ProcStarter#pwd(hudson.FilePath)}
-     * <dt>{@link Computer} <dd>a agent we are running on
+     * <dt>{@link Computer} <dd>an agent we are running on
      * <dt>{@link Executor} <dd>an executor slot on a agent we are running on
      * <dt>{@link TaskListener} <dd>a place to send output (see {@code LogAction} for a flow)
      * <dt>{@link Run} <dd>a running build
