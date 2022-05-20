@@ -9,8 +9,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import hudson.init.Terminator;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import org.acegisecurity.Authentication;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.DoNotUse;
 
 /**
  * Similar to {@link SynchronousStepExecution} (it executes synchronously too) but it does not block the CPS VM thread.
@@ -18,6 +23,8 @@ import org.acegisecurity.Authentication;
  * @param <T> the type of the return value (may be {@link Void})
  */
 public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecution {
+
+    private static final Logger LOGGER = Logger.getLogger(SynchronousNonBlockingStepExecution.class.getName());
 
     private transient volatile Future<?> task;
     private transient String threadName;
@@ -92,6 +99,14 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
             executorService = Executors.newCachedThreadPool(new NamingThreadFactory(new ClassLoaderSanityThreadFactory(new DaemonThreadFactory()), "org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution"));
         }
         return executorService;
+    }
+
+    @Restricted(DoNotUse.class)
+    @Terminator public static synchronized void shutdown() throws InterruptedException {
+        if (executorService != null) {
+            executorService.shutdownNow();
+            executorService.awaitTermination(1, TimeUnit.MINUTES);
+        }
     }
 
 }
