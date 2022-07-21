@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.plugins.workflow.steps;
 
+import hudson.Util;
 import jenkins.model.CauseOfInterruption;
 
 import java.io.Serializable;
@@ -57,8 +58,19 @@ public abstract class BodyExecution implements Future<Object>, Serializable {
      * has happened or completed before this method returns.
      *
      * @return false if the task cannot be cancelled.
+     * @deprecated use {@link #cancel(boolean, CauseOfInterruption...)}
      */
-    public abstract boolean cancel(CauseOfInterruption... causes);
+    public boolean cancel(CauseOfInterruption... causes) {
+        return cancel(true, causes);
+    }
+
+    public boolean cancel(boolean actualInterruption, CauseOfInterruption... causes) {
+        if (Util.isOverridden(BodyExecution.class, getClass(), "cancel", CauseOfInterruption[].class)) {
+            return cancel(causes);
+        } else {
+            throw new AbstractMethodError("Override cancel(boolean, CauseOfInterruption...) from " + getClass());
+        }
+    }
 
     /**
      * @deprecated
@@ -73,7 +85,7 @@ public abstract class BodyExecution implements Future<Object>, Serializable {
      * the cause is a random exception.
      */
     public boolean cancel(Throwable t) {
-        return cancel(new ExceptionCause(t));
+        return cancel(t instanceof FlowInterruptedException ? ((FlowInterruptedException) t).isActualInterruption() : false, new ExceptionCause(t));
     }
 
     private static final long serialVersionUID = 1L;
