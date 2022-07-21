@@ -67,14 +67,11 @@ public final class FlowInterruptedException extends InterruptedException {
     private Boolean actualInterruption = true;
 
     /**
-     * Creates a new exception.
-     * @param result the desired result for the flow, typically {@link Result#ABORTED}
-     * @param causes any indications
+     * @deprecated use {@link #FlowInterruptedException(Result, boolean, CauseOfInterruption...)}
      */
+    @Deprecated
     public FlowInterruptedException(@NonNull Result result, @NonNull CauseOfInterruption... causes) {
-        this.result = result;
-        this.causes = Arrays.asList(causes);
-        this.actualInterruption = true;
+        this(result, true, causes);
     }
 
     /**
