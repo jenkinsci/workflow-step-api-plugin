@@ -56,7 +56,7 @@ public abstract class BodyExecution implements Future<Object>, Serializable {
     @Deprecated
     public boolean cancel(CauseOfInterruption... causes) {
         if (Util.isOverridden(BodyExecution.class, getClass(), "cancel", Throwable.class)) {
-            return cancel(new FlowInterruptedException(Result.ABORTED, causes));
+            return cancel(new FlowInterruptedException(Result.ABORTED, true, causes));
         } else {
             throw new AbstractMethodError("Override cancel(Throwable) from " + getClass());
         }
