@@ -77,7 +77,7 @@ public abstract class BodyExecution implements Future<Object>, Serializable {
      * If the body has finished executing, or is cancelled already, the attempt will
      * fail. This method is asynchronous. There's no guarantee that the cancellation
      * has happened or completed before this method returns.
-     *
+     * @param t reason for cancellation; typically a {@link FlowInterruptedException}
      * @return false if the task cannot be cancelled.
      */
     public boolean cancel(Throwable t) {
