@@ -4,7 +4,14 @@ import jenkins.model.CauseOfInterruption;
 
 import java.io.Serializable;
 
-@Deprecated
+/**
+ * {@link CauseOfInterruption} that captures random {@link Throwable},
+ * which is used when the cancellation is in response to some failures.
+ *
+ * TODO: move this to core
+ * TODO: better summary.jelly
+ * @author Kohsuke Kawaguchi
+ */
 class ExceptionCause extends CauseOfInterruption implements Serializable {
     private final Throwable t;
 

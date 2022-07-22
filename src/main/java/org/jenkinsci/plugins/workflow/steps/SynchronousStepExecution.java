@@ -51,6 +51,7 @@ public abstract class SynchronousStepExecution<T> extends StepExecution {
         Thread e = executing;   // capture
         if (e!=null) {
             if (e instanceof Executor) {
+                // TODO if cause instanceof FlowInterruptedException, unpack result & causes
                 ((Executor) e).interrupt(ABORTED, new ExceptionCause(cause));
             } else {
                 e.interrupt();
