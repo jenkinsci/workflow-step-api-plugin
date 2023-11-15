@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.workflow.steps;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +17,17 @@ import java.util.Set;
  */
 public class MissingContextVariableException extends Exception {
     private final @NonNull Class<?> type;
+    private final @CheckForNull String functionName;
 
+    /** @deprecated use {@link #MissingContextVariableException(Class, StepDescriptor)} */
+    @Deprecated
     public MissingContextVariableException(@NonNull Class<?> type) {
+        this(type, null);
+    }
+
+    public MissingContextVariableException(@NonNull Class<?> type, @CheckForNull StepDescriptor d) {
         this.type = type;
+        functionName = d != null ? d.getFunctionName() : null;
     }
 
     public Class<?> getType() {
@@ -30,7 +39,11 @@ public class MissingContextVariableException extends Exception {
         boolean first = true;
         for (StepDescriptor p : getProviders()) {
             if (first) {
-                b.append("\nPerhaps you forgot to surround the code with a step that provides this, such as: ");
+                b.append("\nPerhaps you forgot to surround the ");
+                if (functionName != null) {
+                    b.append(functionName).append(" ");
+                }
+                b.append("step with a step that provides this, such as: ");
                 first = false;
             } else {
                 b.append(", ");
