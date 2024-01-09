@@ -4,7 +4,7 @@ import com.google.inject.Injector;
 import jenkins.model.Jenkins;
 
 import edu.umd.cs.findbugs.annotations.Nullable;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * Partial convenient step implementation.

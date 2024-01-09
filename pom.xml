@@ -64,15 +64,15 @@
     <properties>
         <changelist>999999-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
-        <jenkins.version>2.387.3</jenkins.version>
+        <jenkins.version>2.414.3</jenkins.version>
         <no-test-jar>false</no-test-jar>
     </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.387.x</artifactId>
-                <version>2465.va_e76ed7b_3061</version>
+                <artifactId>bom-2.414.x</artifactId>
+                <version>2705.vf5c48c31285b_</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
