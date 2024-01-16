@@ -14,7 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import jenkins.model.queue.AsynchronousExecution;
 import jenkins.util.Timer;
 
