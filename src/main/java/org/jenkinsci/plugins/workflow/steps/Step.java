@@ -61,6 +61,7 @@ public abstract class Step extends AbstractDescribableImpl<Step> implements Exte
      * @throws Exception
      *      if any exception is thrown, {@link Step} is assumed to have completed abnormally synchronously
      *      (as if {@link StepContext#onFailure} is called and the method returned true.)
+     * @see StepExecutions
      */
     public abstract StepExecution start(StepContext context) throws Exception;
 
