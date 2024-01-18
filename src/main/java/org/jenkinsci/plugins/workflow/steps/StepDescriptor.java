@@ -261,8 +261,9 @@ public abstract class StepDescriptor extends Descriptor<Step> {
         // TODO the order here is nondeterministic; should we pick the lexicographic first? Or extend MissingContextVariableException to take a Set<Class<?>> types?
         for (Class<?> type : getRequiredContext()) {
             Object v = c.get(type);
-            if (v==null)
-                throw new MissingContextVariableException(type);
+            if (v == null) {
+                throw new MissingContextVariableException(type, this);
+            }
         }
     }
 
