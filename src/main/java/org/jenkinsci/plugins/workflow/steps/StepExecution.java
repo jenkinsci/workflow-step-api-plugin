@@ -28,6 +28,7 @@ import jenkins.util.Timer;
  * @author Kohsuke Kawaguchi
  * @author Jesse Glick
  * @see Step#start(StepContext)
+ * @see StepExecutions#block
  */
 public abstract class StepExecution implements Serializable {
 
