@@ -15,6 +15,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
  *
  * @param <T> the type of the return value (may be {@link Void})
  * @author Kohsuke Kawaguchi
+ * @see StepExecutions#synchronous
  */
 public abstract class SynchronousStepExecution<T> extends StepExecution {
     private transient volatile Thread executing;

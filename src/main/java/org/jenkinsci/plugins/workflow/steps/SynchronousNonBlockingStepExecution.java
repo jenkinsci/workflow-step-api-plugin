@@ -14,8 +14,8 @@ import org.acegisecurity.Authentication;
 
 /**
  * Similar to {@link SynchronousStepExecution} (it executes synchronously too) but it does not block the CPS VM thread.
- * @see StepExecution
  * @param <T> the type of the return value (may be {@link Void})
+ * @see StepExecutions#synchronousNonBlocking
  */
 public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecution {
 
