@@ -76,7 +76,7 @@ public abstract class StepContext implements FutureCallback<Object>, Serializabl
      * @see BodyInvoker#withContext
      * @see DynamicContext
      */
-    public abstract @Nullable <T> T get(Class<T> key) throws IOException, InterruptedException;
+    public abstract <T> T get(Class<T> key) throws IOException, InterruptedException;
 
     @Override public abstract void onSuccess(@Nullable Object result);
 
