@@ -34,7 +34,7 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.Stapler;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 /**
  * JENKINS-19413 workaround.
@@ -56,10 +56,10 @@ public class StaplerReferer {
     }
 
     /**
-     * Like {@link StaplerRequest#findAncestorObject} except works also in configuration screens when a lazy-load section is newly added.
+     * Like {@link StaplerRequest2#findAncestorObject} except works also in configuration screens when a lazy-load section is newly added.
      */
     public static @CheckForNull <T extends Item> T findItemFromRequest(Class<T> type) {
-        StaplerRequest request = Stapler.getCurrentRequest();
+        StaplerRequest2 request = Stapler.getCurrentRequest2();
         if (request == null) {
             LOGGER.warning("no current request");
             return null;
