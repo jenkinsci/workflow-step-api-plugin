@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.workflow.steps;
 
-import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.io.Serializable;
@@ -10,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
@@ -182,6 +182,14 @@ public abstract class StepExecution implements Serializable {
     }
 
     /**
+     * @deprecated use {@link #applyAll(Function)}
+     */
+    @Deprecated
+    public static ListenableFuture<?> applyAll(com.google.common.base.Function<StepExecution, Void> f) {
+        return applyAll(fromGuava(f));
+    }
+
+    /**
      * Applies only to the specific subtypes.
      */
     public static <T extends StepExecution> ListenableFuture<?> applyAll(final Class<T> type, final Function<T,Void> f) {
@@ -193,6 +201,19 @@ public abstract class StepExecution implements Serializable {
                 return null;
             }
         });
+    }
+
+    /**
+     * @deprecated use {@link #applyAll(Class, Function)}
+     */
+    @Deprecated
+    public static <T extends StepExecution> ListenableFuture<?> applyAll(
+            final Class<T> type, final com.google.common.base.Function<T, Void> f) {
+        return applyAll(type, fromGuava(f));
+    }
+
+    private static <T, R> Function<T, R> fromGuava(com.google.common.base.Function<T, R> func) {
+        return func::apply;
     }
 
     private static final long serialVersionUID = 1L;
