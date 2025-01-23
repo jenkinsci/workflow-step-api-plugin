@@ -1,19 +1,20 @@
 package org.jenkinsci.plugins.workflow.steps;
 
+import com.google.common.base.Function;
 import com.google.common.util.concurrent.ListenableFuture;
 import hudson.ExtensionList;
 import hudson.ExtensionPoint;
 import hudson.Util;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 /**
  * Enumerates active running {@link StepExecution}s in the system.
- * @see StepExecution#applyAll(Class, Function)
+ * @see StepExecution#acceptAll(Class, Consumer)
  * @author Kohsuke Kawaguchi
  */
 public abstract class StepExecutionIterator implements ExtensionPoint {
     /**
-     * Finds all the ongoing {@link StepExecution} and apply the function.
+     * Finds all the ongoing {@link StepExecution} and apply the action.
      *
      * The control flow is inverted because a major use case (workflow) loads
      * {@link StepExecution}s asynchronously (for example when workflow run
@@ -22,30 +23,27 @@ public abstract class StepExecutionIterator implements ExtensionPoint {
      * @return
      *      {@link ListenableFuture} to signal the completion of the application.
      */
-    public /* abstract */ ListenableFuture<?> apply(Function<StepExecution, Void> f) {
-        return Util.ifOverridden(
-                () -> apply(toGuava(f)),
-                StepExecutionIterator.class,
-                getClass(),
-                "apply",
-                com.google.common.base.Function.class);
+    public /* abstract */ ListenableFuture<?> accept(Consumer<StepExecution> f) {
+        return Util.ifOverridden(() -> apply(toGuava(f)), StepExecutionIterator.class, getClass(), "apply", Function.class);
     }
 
     /**
-     * @deprecated use {@link #apply(Function)}
+     * @deprecated use {@link #accept}
      */
     @Deprecated
-    public /* abstract */ ListenableFuture<?> apply(com.google.common.base.Function<StepExecution, Void> f) {
-        return Util.ifOverridden(
-                () -> apply(fromGuava(f)), StepExecutionIterator.class, getClass(), "apply", Function.class);
+    public /* abstract */ ListenableFuture<?> apply(Function<StepExecution, Void> f) {
+        return Util.ifOverridden(() -> accept(fromGuava(f)), StepExecutionIterator.class, getClass(), "accept", Consumer.class);
     }
 
-    private static <T, R> Function<T, R> fromGuava(com.google.common.base.Function<T, R> func) {
+    private static <T> Consumer<T> fromGuava(Function<T, Void> func) {
         return func::apply;
     }
 
-    private static <T, R> com.google.common.base.Function<T, R> toGuava(Function<T, R> func) {
-        return func::apply;
+    private static <T> Function<T, Void> toGuava(Consumer<T> consumer) {
+        return v -> {
+            consumer.accept(v);
+            return null;
+        };
     }
 
     public static ExtensionList<StepExecutionIterator> all() {

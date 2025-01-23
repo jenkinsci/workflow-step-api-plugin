@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.workflow.steps;
 
+import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.io.Serializable;
@@ -9,12 +10,12 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import jakarta.inject.Inject;
+import java.util.function.Consumer;
 import jenkins.model.queue.AsynchronousExecution;
 import jenkins.util.Timer;
 
@@ -168,51 +169,48 @@ public abstract class StepExecution implements Serializable {
     }
 
     /**
-     * Apply the given function to all the active running {@link StepExecution}s in the system.
+     * Apply the given action to all the active running {@link StepExecution}s in the system.
      *
      * @return
-     *      Future object that signals when the function application is complete.
+     *      Future object that signals when the calls are complete.
      * @see StepExecutionIterator
      */
-    public static ListenableFuture<?> applyAll(Function<StepExecution,Void> f) {
+    public static ListenableFuture<?> acceptAll(Consumer<StepExecution> c) {
         List<ListenableFuture<?>> futures = new ArrayList<>();
-        for (StepExecutionIterator i : StepExecutionIterator.all())
-            futures.add(i.apply(f));
+        for (StepExecutionIterator i : StepExecutionIterator.all()) {
+            futures.add(i.accept(c));
+        }
         return Futures.allAsList(futures);
     }
 
     /**
-     * @deprecated use {@link #applyAll(Function)}
+     * @deprecated use {@link #acceptAll(Consumer)}
      */
     @Deprecated
-    public static ListenableFuture<?> applyAll(com.google.common.base.Function<StepExecution, Void> f) {
-        return applyAll(fromGuava(f));
+    public static ListenableFuture<?> applyAll(Function<StepExecution, Void> f) {
+        return acceptAll(fromGuava(f));
     }
 
     /**
      * Applies only to the specific subtypes.
      */
-    public static <T extends StepExecution> ListenableFuture<?> applyAll(final Class<T> type, final Function<T,Void> f) {
-        return applyAll(new Function<StepExecution, Void>() {
-            @Override
-            public Void apply(StepExecution e) {
-                if (type.isInstance(e))
-                    f.apply(type.cast(e));
-                return null;
+    public static <T extends StepExecution> ListenableFuture<?> acceptAll(Class<T> type, Consumer<T> c) {
+        return acceptAll(e -> {
+            if (type.isInstance(e)) {
+                c.accept(type.cast(e));
             }
         });
     }
 
     /**
-     * @deprecated use {@link #applyAll(Class, Function)}
+     * @deprecated use {@link #acceptAll(Class, Consumer)}
      */
     @Deprecated
-    public static <T extends StepExecution> ListenableFuture<?> applyAll(
-            final Class<T> type, final com.google.common.base.Function<T, Void> f) {
-        return applyAll(type, fromGuava(f));
+    public static <T extends StepExecution> ListenableFuture<?> applyAll(Class<T> type, Function<T, Void> f) {
+        return acceptAll(type, fromGuava(f));
     }
 
-    private static <T, R> Function<T, R> fromGuava(com.google.common.base.Function<T, R> func) {
+    private static <T> Consumer<T> fromGuava(Function<T, Void> func) {
         return func::apply;
     }
 
