@@ -30,7 +30,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.Jenkins;
-import org.acegisecurity.Authentication;
+import org.springframework.security.core.Authentication;
 
 /**
  * Generalization of {@link SynchronousNonBlockingStepExecution} that can be used for {@linkplain StepDescriptor#takesImplicitBlockArgument block-scoped steps}.
@@ -69,11 +69,11 @@ public abstract class GeneralNonBlockingStepExecution extends StepExecution {
         if (stopCause != null) {
             return;
         }
-        final Authentication auth = Jenkins.getAuthentication();
+        final Authentication auth = Jenkins.getAuthentication2();
         task = SynchronousNonBlockingStepExecution.getExecutorService().submit(() -> {
             threadName = Thread.currentThread().getName();
             try {
-                try (ACLContext acl = ACL.as(auth)) {
+                try (ACLContext acl = ACL.as2(auth)) {
                     block.run();
                 }
             } catch (Throwable x) {

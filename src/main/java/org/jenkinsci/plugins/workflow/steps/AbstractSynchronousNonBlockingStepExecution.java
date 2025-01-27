@@ -6,7 +6,7 @@ import java.util.concurrent.Future;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.Jenkins;
 import jenkins.security.NotReallyRoleSensitiveCallable;
-import org.acegisecurity.Authentication;
+import org.springframework.security.core.Authentication;
 
 /**
  * Similar to {@link AbstractSynchronousStepExecution} (it executes synchronously too) but it does not block the CPS VM thread.
@@ -36,12 +36,12 @@ public abstract class AbstractSynchronousNonBlockingStepExecution<T> extends Abs
 
     @Override
     public final boolean start() throws Exception {
-        final Authentication auth = Jenkins.getAuthentication();
+        final Authentication auth = Jenkins.getAuthentication2();
         task = SynchronousNonBlockingStepExecution.getExecutorService().submit(new Runnable() {
             @SuppressFBWarnings(value="SE_BAD_FIELD", justification="not serializing anything here")
             @Override public void run() {
                 try {
-                    getContext().onSuccess(ACL.impersonate(auth, new NotReallyRoleSensitiveCallable<T, Exception>() {
+                    getContext().onSuccess(ACL.impersonate2(auth, new NotReallyRoleSensitiveCallable<T, Exception>() {
                         @Override public T call() throws Exception {
                             threadName = Thread.currentThread().getName();
                             return AbstractSynchronousNonBlockingStepExecution.this.run();
