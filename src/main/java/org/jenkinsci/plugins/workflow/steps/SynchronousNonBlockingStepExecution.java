@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.Jenkins;
-import org.acegisecurity.Authentication;
+import org.springframework.security.core.Authentication;
 
 /**
  * Similar to {@link SynchronousStepExecution} (it executes synchronously too) but it does not block the CPS VM thread.
@@ -38,12 +38,12 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
 
     @Override
     public final boolean start() throws Exception {
-        final Authentication auth = Jenkins.getAuthentication();
+        final Authentication auth = Jenkins.getAuthentication2();
         task = getExecutorService().submit(() -> {
             threadName = Thread.currentThread().getName();
             try {
                 T ret;
-                try (ACLContext acl = ACL.as(auth)) {
+                try (ACLContext acl = ACL.as2(auth)) {
                     ret = run();
                 }
                 getContext().onSuccess(ret);
