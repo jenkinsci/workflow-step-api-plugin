@@ -5,6 +5,8 @@ import hudson.security.ACLContext;
 import hudson.util.ClassLoaderSanityThreadFactory;
 import hudson.util.DaemonThreadFactory;
 import hudson.util.NamingThreadFactory;
+
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -72,7 +74,14 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
 
     @Override
     public void onResume() {
-        getContext().onFailure(new SynchronousResumeNotSupportedException());
+        StepContext context = getContext();
+        String stepFunctionDisplayName = null;
+        try {
+            stepFunctionDisplayName = context.getStepDisplayFunctionName();
+        } catch (IOException x) {
+            // ignore
+        }
+        context.onFailure(new SynchronousResumeNotSupportedException(stepFunctionDisplayName));
     }
 
     @Override public @NonNull String getStatus() {
