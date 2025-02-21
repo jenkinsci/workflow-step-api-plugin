@@ -33,8 +33,18 @@ package org.jenkinsci.plugins.workflow.steps;
  */
 public class SynchronousResumeNotSupportedException extends Exception {
 
+    private static final String message = "Resume after a restart not supported for non-blocking synchronous steps";
+
     public SynchronousResumeNotSupportedException() {
-        super("Resume after a restart not supported for non-blocking synchronous steps");
+        super(message);
+    }
+
+    public SynchronousResumeNotSupportedException(String stepDisplayFunctionName) {
+        super(
+            stepDisplayFunctionName == null
+            ? message
+            : message + ", failed step is " + stepDisplayFunctionName + ", you may wrap this block into a retry step "
+              + "with nonresumable condition");
     }
 
 }

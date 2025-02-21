@@ -149,4 +149,9 @@ public abstract class StepContext implements FutureCallback<Object>, Serializabl
     public abstract int hashCode();
 
     private static final long serialVersionUID = 1L;
+
+    /**
+     * Returns the function name used in pipeline Jenkinsfile for the current StepNode.
+     */
+    public abstract String getStepDisplayFunctionName() throws IOException;
 }
