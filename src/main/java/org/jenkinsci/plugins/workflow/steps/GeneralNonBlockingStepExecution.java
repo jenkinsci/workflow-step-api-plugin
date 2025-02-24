@@ -104,7 +104,8 @@ public abstract class GeneralNonBlockingStepExecution extends StepExecution {
     @Override
     public void onResume() {
         if (threadName != null) {
-            getContext().onFailure(new SynchronousResumeNotSupportedException(StepExecutionUtil.getStepDisplayFunctionName(this)));
+            var context = getContext();
+            context.onFailure(new SynchronousResumeNotSupportedException(context));
         }
     }
 

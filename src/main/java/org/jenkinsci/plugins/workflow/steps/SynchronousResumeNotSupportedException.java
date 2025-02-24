@@ -24,6 +24,10 @@
 
 package org.jenkinsci.plugins.workflow.steps;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * May be reported from {@link StepExecution#onResume} when the step does not support resumption.
  * Thrown by default from {@link SynchronousNonBlockingStepExecution},
@@ -33,20 +37,32 @@ package org.jenkinsci.plugins.workflow.steps;
  */
 public class SynchronousResumeNotSupportedException extends Exception {
 
+    private static final Logger LOGGER = Logger.getLogger(SynchronousResumeNotSupportedException.class.getName());
+
     /**
-     * @deprecated Use {@link #SynchronousResumeNotSupportedException(String)} instead.
+     * @deprecated Use {@link #SynchronousResumeNotSupportedException(StepContext)} instead.
      */
     @Deprecated
     public SynchronousResumeNotSupportedException() {
         super("Resume after a restart not supported for non-blocking synchronous steps");
     }
 
-    public SynchronousResumeNotSupportedException(String stepDisplayFunctionName) {
+    public SynchronousResumeNotSupportedException(StepContext context) {
         super(String.format("""
             The Pipeline step `%s` cannot be resumed after a controller restart. \
             In Scripted syntax, you may wrap its containing `node` block within `retry(conditions: [nonresumable()], count: 2) {...}`, \
             or, in Declarative syntax, use the `retries` option to an `agent` directive to allow the stage to be retried.""",
-                            stepDisplayFunctionName)
+                            getStepDisplayFunctionName(context))
         );
+    }
+
+    private static String getStepDisplayFunctionName(StepContext stepContext) {
+        StepDescriptor descriptor = null;
+        try {
+            descriptor = stepContext.get(StepDescriptor.class);
+        } catch (IOException | InterruptedException e) {
+            LOGGER.log(Level.FINE, "Failed to get descriptor: ", e);
+        }
+        return descriptor != null ? descriptor.getFunctionName() : "?";
     }
 }

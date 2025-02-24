@@ -67,7 +67,8 @@ public abstract class AbstractSynchronousNonBlockingStepExecution<T> extends Abs
 
     @Override
     public void onResume() {
-        getContext().onFailure(new SynchronousResumeNotSupportedException(StepExecutionUtil.getStepDisplayFunctionName(this)));
+        var context = getContext();
+        context.onFailure(new SynchronousResumeNotSupportedException(context));
     }
 
     @Override public @NonNull String getStatus() {
