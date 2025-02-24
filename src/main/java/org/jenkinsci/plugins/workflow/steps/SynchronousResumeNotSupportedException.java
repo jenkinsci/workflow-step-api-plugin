@@ -43,7 +43,7 @@ public class SynchronousResumeNotSupportedException extends Exception {
 
     public SynchronousResumeNotSupportedException(String stepDisplayFunctionName) {
         super(String.format("""
-            Step `%s` is a non-blocking synchronous step; it doesn't support resume after a restart. \
+            The Pipeline step `%s` cannot be resumed after a controller restart. \
             In Scripted syntax, you may wrap its containing `node` block within `retry(conditions: [nonresumable()], count: 2) {...}`, \
             or, in Declarative syntax, use the `retries` option to an `agent` directive to allow the stage to be retried.""",
                             stepDisplayFunctionName)
