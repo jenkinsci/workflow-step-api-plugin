@@ -74,14 +74,7 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
 
     @Override
     public void onResume() {
-        StepContext context = getContext();
-        String stepFunctionDisplayName = null;
-        try {
-            stepFunctionDisplayName = context.getStepDisplayFunctionName();
-        } catch (IOException x) {
-            // ignore
-        }
-        context.onFailure(new SynchronousResumeNotSupportedException(stepFunctionDisplayName));
+        getContext().onFailure(new SynchronousResumeNotSupportedException(StepExecutionUtil.getStepDisplayFunctionName(this)));
     }
 
     @Override public @NonNull String getStatus() {
