@@ -36,7 +36,7 @@ public class SynchronousResumeNotSupportedException extends Exception {
     /**
      * @deprecated Use {@link #SynchronousResumeNotSupportedException(String)} instead.
      */
-     @Deprecated
+    @Deprecated
     public SynchronousResumeNotSupportedException() {
         super("Resume after a restart not supported for non-blocking synchronous steps");
     }
