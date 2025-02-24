@@ -44,7 +44,7 @@ public class SynchronousResumeNotSupportedException extends Exception {
     public SynchronousResumeNotSupportedException(String stepDisplayFunctionName) {
         super(String.format("""
             Step `%s` is a non-blocking synchronous step; it doesn't support resume after a restart. \
-            You may wrap it within `retry(conditions: [nonresumable()], count: 2) {...}`, \
+            In Scripted syntax, you may wrap its containing `node` block within `retry(conditions: [nonresumable()], count: 2) {...}`, \
             or, in declarative syntax, use the `retries` option to an `agent` directive to resume it.""",
                             stepDisplayFunctionName)
         );
