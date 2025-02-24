@@ -149,5 +149,4 @@ public abstract class StepContext implements FutureCallback<Object>, Serializabl
     public abstract int hashCode();
 
     private static final long serialVersionUID = 1L;
-
 }
