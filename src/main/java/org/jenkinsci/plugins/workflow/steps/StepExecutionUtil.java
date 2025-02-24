@@ -15,6 +15,6 @@ public class StepExecutionUtil {
         } catch (IOException | InterruptedException e) {
             LOGGER.log(Level.FINE, "Failed get descriptor: ", e);
         }
-        return descriptor != null ? descriptor.getFunctionName() : "";
+        return descriptor != null ? descriptor.getFunctionName() : "?";
     }
 }
