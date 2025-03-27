@@ -26,7 +26,6 @@ package org.jenkinsci.plugins.workflow.steps;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.ExtensionList;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -276,7 +275,6 @@ public abstract class StepDescriptor extends Descriptor<Step> {
      */
     public static Iterable<StepDescriptor> allMeta() {
         return Iterables.filter(all(), new Predicate<StepDescriptor>() {
-            @SuppressFBWarnings(value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", justification="all() will not return nulls")
             @Override
             public boolean apply(StepDescriptor i) {
                 Class<?> a = i.getMetaStepArgumentType();
