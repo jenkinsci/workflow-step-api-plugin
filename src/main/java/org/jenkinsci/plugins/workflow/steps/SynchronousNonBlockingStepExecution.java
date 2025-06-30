@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.workflow.steps;
 
+import hudson.ExtensionList;
+import hudson.ExtensionPoint;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
 import hudson.util.ClassLoaderSanityThreadFactory;
@@ -12,6 +14,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.Jenkins;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.Beta;
 import org.springframework.security.core.Authentication;
 
 /**
@@ -92,9 +96,26 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
 
     static synchronized ExecutorService getExecutorService() {
         if (executorService == null) {
-            executorService = Executors.newCachedThreadPool(new NamingThreadFactory(new ClassLoaderSanityThreadFactory(new DaemonThreadFactory()), "org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution"));
+            ExecutorService result = Executors.newCachedThreadPool(new NamingThreadFactory(new ClassLoaderSanityThreadFactory(new DaemonThreadFactory()), "org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution"));
+            
+            for (SynchronousNonBlockingStepExecutorServiceAugmentor augmentor : ExtensionList.lookup(SynchronousNonBlockingStepExecutorServiceAugmentor.class)) {
+                result = augmentor.augment(result);
+            }
+            executorService = result;
         }
         return executorService;
+    }
+
+    /**
+     * Extension point for augmenting the executorService of {@link SynchronousNonBlockingStepExecution}.
+     */
+    @Restricted(Beta.class)
+    public interface SynchronousNonBlockingStepExecutorServiceAugmentor extends ExtensionPoint {
+        /**
+         * Augment the executor service used by {@link SynchronousNonBlockingStepExecution}.
+         * @param executorService the executor service to augment
+         */
+        ExecutorService augment(ExecutorService executorService);
     }
 
 }
