@@ -29,7 +29,7 @@ public class SynchronousNonBlockingStepExecutorServiceAugmentorTest {
 
     @TestExtension
     public static class AugmentorTestExtension
-            implements SynchronousNonBlockingStepExecution.SynchronousNonBlockingStepExecutorServiceAugmentor {
+            implements SynchronousNonBlockingStepExecution.ExecutorServiceAugmentor {
 
         private static final Logger LOGGER = Logger.getLogger(AugmentorTestExtension.class.getName());
 

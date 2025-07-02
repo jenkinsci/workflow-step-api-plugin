@@ -8,7 +8,6 @@ import hudson.util.ClassLoaderSanityThreadFactory;
 import hudson.util.DaemonThreadFactory;
 import hudson.util.NamingThreadFactory;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -98,7 +97,7 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
         if (executorService == null) {
             ExecutorService result = Executors.newCachedThreadPool(new NamingThreadFactory(new ClassLoaderSanityThreadFactory(new DaemonThreadFactory()), "org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution"));
             
-            for (SynchronousNonBlockingStepExecutorServiceAugmentor augmentor : ExtensionList.lookup(SynchronousNonBlockingStepExecutorServiceAugmentor.class)) {
+            for (ExecutorServiceAugmentor augmentor : ExtensionList.lookup(ExecutorServiceAugmentor.class)) {
                 result = augmentor.augment(result);
             }
             executorService = result;
@@ -110,9 +109,9 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
      * Extension point for augmenting the executorService of {@link SynchronousNonBlockingStepExecution}.
      */
     @Restricted(Beta.class)
-    public interface SynchronousNonBlockingStepExecutorServiceAugmentor extends ExtensionPoint {
+    public interface ExecutorServiceAugmentor extends ExtensionPoint {
         /**
-         * Augment the executor service used by {@link SynchronousNonBlockingStepExecution}.
+         * Augment the executor service used by {@link SynchronousNonBlockingStepExecution} and {@link GeneralNonBlockingStepExecution}.
          * @param executorService the executor service to augment
          */
         ExecutorService augment(ExecutorService executorService);
