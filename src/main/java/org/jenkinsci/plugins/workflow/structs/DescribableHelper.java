@@ -51,6 +51,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
@@ -63,7 +64,6 @@ import jenkins.model.Jenkins;
 import net.java.sezpoz.Index;
 import net.java.sezpoz.IndexItem;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ObjectUtils;
 import org.codehaus.groovy.reflection.ReflectionCache;
 import org.jenkinsci.plugins.structs.describable.DescribableModel;
 import org.kohsuke.stapler.ClassDescriptor;
@@ -531,7 +531,7 @@ public class DescribableHelper {
             }
         }
         for (String field : dataBoundSetters) {
-            if (ObjectUtils.equals(allDataBoundProps.get(field), fromControl.get(field))) {
+            if (Objects.equals(allDataBoundProps.get(field), fromControl.get(field))) {
                 allDataBoundProps.remove(field);
             }
         }
