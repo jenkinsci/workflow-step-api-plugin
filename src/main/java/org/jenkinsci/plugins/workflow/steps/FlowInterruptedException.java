@@ -36,6 +36,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.CauseOfInterruption;
@@ -107,6 +109,13 @@ public final class FlowInterruptedException extends InterruptedException {
             actualInterruption = true;
         }
         return this;
+    }
+
+    @Override
+    public String getMessage() {
+        return causes.stream()
+            .map(CauseOfInterruption::getShortDescription)
+            .collect(Collectors.joining( ", " ));
     }
 
     /**
