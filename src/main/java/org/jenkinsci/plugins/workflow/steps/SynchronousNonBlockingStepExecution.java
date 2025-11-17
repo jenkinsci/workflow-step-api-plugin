@@ -1,17 +1,20 @@
 package org.jenkinsci.plugins.workflow.steps;
 
+import hudson.ExtensionList;
+import hudson.ExtensionPoint;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
 import hudson.util.ClassLoaderSanityThreadFactory;
 import hudson.util.DaemonThreadFactory;
 import hudson.util.NamingThreadFactory;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.Jenkins;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.Beta;
 import org.springframework.security.core.Authentication;
 
 /**
@@ -92,9 +95,26 @@ public abstract class SynchronousNonBlockingStepExecution<T> extends StepExecuti
 
     static synchronized ExecutorService getExecutorService() {
         if (executorService == null) {
-            executorService = Executors.newCachedThreadPool(new NamingThreadFactory(new ClassLoaderSanityThreadFactory(new DaemonThreadFactory()), "org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution"));
+            ExecutorService result = Executors.newCachedThreadPool(new NamingThreadFactory(new ClassLoaderSanityThreadFactory(new DaemonThreadFactory()), "org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution"));
+            
+            for (ExecutorServiceAugmentor augmentor : ExtensionList.lookup(ExecutorServiceAugmentor.class)) {
+                result = augmentor.augment(result);
+            }
+            executorService = result;
         }
         return executorService;
+    }
+
+    /**
+     * Extension point for augmenting the executorService of {@link SynchronousNonBlockingStepExecution}.
+     */
+    @Restricted(Beta.class)
+    public interface ExecutorServiceAugmentor extends ExtensionPoint {
+        /**
+         * Augment the executor service used by {@link SynchronousNonBlockingStepExecution} and {@link GeneralNonBlockingStepExecution}.
+         * @param executorService the executor service to augment
+         */
+        ExecutorService augment(ExecutorService executorService);
     }
 
 }
