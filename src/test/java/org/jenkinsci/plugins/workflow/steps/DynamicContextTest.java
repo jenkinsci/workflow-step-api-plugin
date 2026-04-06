@@ -25,12 +25,15 @@
 package org.jenkinsci.plugins.workflow.steps;
 
 import java.io.IOException;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
 
-public class DynamicContextTest {
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-    @Test public void subclassing() throws Exception {
+class DynamicContextTest {
+
+    @Test
+    void subclassing() throws Exception {
         class Super {}
         class Sub extends Super {}
         class Sub2 extends Super {}
@@ -48,10 +51,9 @@ public class DynamicContextTest {
             }
         }
         DynamicContext ctx = new Dyn();
-        assertNotNull("can look up via supertype", ctx.get(Super.class, nullContext));
-        assertNotNull("can look up via subtype", ctx.get(Sub.class, nullContext));
-        assertNull("but not via a mismatched subtype", ctx.get(Sub2.class, nullContext));
-        assertNull("nor via an unrelated supertype", ctx.get(Runnable.class, nullContext));
+        assertNotNull(ctx.get(Super.class, nullContext), "can look up via supertype");
+        assertNotNull(ctx.get(Sub.class, nullContext), "can look up via subtype");
+        assertNull(ctx.get(Sub2.class, nullContext), "but not via a mismatched subtype");
+        assertNull(ctx.get(Runnable.class, nullContext), "nor via an unrelated supertype");
     }
-
 }

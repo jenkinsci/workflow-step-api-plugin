@@ -30,7 +30,9 @@ import hudson.model.AbstractProject;
 import hudson.model.FreeStyleProject;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.jvnet.hudson.test.JenkinsRule;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
@@ -70,18 +72,25 @@ public final class StepConfigTester {
     @Restricted(NoExternalUse.class)
     public static final class StepBuilder extends Builder {
         public final Step s;
-        @DataBoundConstructor public StepBuilder(Step s) {
+
+        @DataBoundConstructor
+        public StepBuilder(Step s) {
             this.s = s;
         }
-        @Extension public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
-            @SuppressWarnings("rawtypes")
-            @Override public boolean isApplicable(Class<? extends AbstractProject> jobType) {
+
+        @SuppressWarnings("unused")
+        @Extension
+        public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
+
+            @Override
+            public boolean isApplicable(Class<? extends AbstractProject> jobType) {
                 return true;
             }
-            @Override public String getDisplayName() {
+
+            @Override
+            public String getDisplayName() {
                 return "Test step builder";
             }
         }
     }
-
 }

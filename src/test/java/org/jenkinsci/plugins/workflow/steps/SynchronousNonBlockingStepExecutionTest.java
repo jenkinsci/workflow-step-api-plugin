@@ -5,6 +5,7 @@ import hudson.model.TaskListener;
 import hudson.model.Run;
 
 import java.io.File;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,33 +21,43 @@ import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.test.steps.SemaphoreStep;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.BuildWatcher;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestExtension;
+import org.jvnet.hudson.test.junit.jupiter.BuildWatcherExtension;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.util.Collections;
-import static org.junit.Assert.assertTrue;
 
-public class SynchronousNonBlockingStepExecutionTest {
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    @Rule public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class SynchronousNonBlockingStepExecutionTest {
 
-    @ClassRule
-    public static BuildWatcher buildWatcher = new BuildWatcher();
+    @SuppressWarnings("unused")
+    @RegisterExtension
+    private static final BuildWatcherExtension BUILD_WATCHER = new BuildWatcherExtension();
+
+    private JenkinsRule j;
+
+    @BeforeEach
+    void setUp(JenkinsRule rule) {
+        j = rule;
+    }
 
     @Test
-    public void basicNonBlockingStep() throws Exception {
+    void basicNonBlockingStep() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        p.setDefinition(new CpsFlowDefinition("node {\n" +
-            "echo 'First message'\n" +
-            "syncnonblocking 'wait'\n" +
-            "echo 'Second message'\n" +
-        "}", true));
+        p.setDefinition(new CpsFlowDefinition("""
+                node {
+                echo 'First message'
+                syncnonblocking 'wait'
+                echo 'Second message'
+                }""", true));
         WorkflowRun b = p.scheduleBuild2(0).getStartCondition().get();
 
         // Wait for syncnonblocking to be started
@@ -67,7 +78,7 @@ public class SynchronousNonBlockingStepExecutionTest {
         }
 
         System.out.println("Checking flow node added...");
-        assertTrue("FlowNode has to be added just when the step starts running", found);
+        assertTrue(found, "FlowNode has to be added just when the step starts running");
 
         // Check for message the test message sent to context listener
         System.out.println("Checking build log message present...");
@@ -87,15 +98,15 @@ public class SynchronousNonBlockingStepExecutionTest {
         j.assertBuildStatusSuccess(b);
     }
 
-
     @Test
-    public void interruptedTest() throws Exception {
+    void interruptedTest() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        p.setDefinition(new CpsFlowDefinition("node {\n" +
-            "echo 'First message'\n" +
-            "try { syncnonblocking 'wait' } catch(InterruptedException e) { echo 'Interrupted!' }\n" +
-            "echo 'Second message'\n" +
-        "}", true));
+        p.setDefinition(new CpsFlowDefinition("""
+                node {
+                echo 'First message'
+                try { syncnonblocking 'wait' } catch(InterruptedException e) { echo 'Interrupted!' }
+                echo 'Second message'
+                }""", true));
         WorkflowRun b = p.scheduleBuild2(0).getStartCondition().get();
 
         // Wait for syncnonblocking to be started
@@ -117,13 +128,14 @@ public class SynchronousNonBlockingStepExecutionTest {
     }
 
     @Test
-    public void parallelTest() throws Exception {
+    void parallelTest() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        p.setDefinition(new CpsFlowDefinition("node {\n" +
-            "echo 'First message'\n" +
-            "parallel( a: { syncnonblocking 'wait0'; echo 'a branch'; }, b: { semaphore 'wait1'; echo 'b branch'; } )\n" +
-            "echo 'Second message'\n" +
-        "}", true));
+        p.setDefinition(new CpsFlowDefinition("""
+                node {
+                echo 'First message'
+                parallel( a: { syncnonblocking 'wait0'; echo 'a branch'; }, b: { semaphore 'wait1'; echo 'b branch'; } )
+                echo 'Second message'
+                }""", true));
         WorkflowRun b = p.scheduleBuild2(0).getStartCondition().get();
 
         SynchronousNonBlockingStep.waitForStart("wait0", b);
@@ -200,8 +212,9 @@ public class SynchronousNonBlockingStepExecutionTest {
         }
 
         private static class StepExecutionImpl extends SynchronousNonBlockingStepExecution<Void> {
-
-            private transient final SynchronousNonBlockingStep step;
+            @Serial
+            private static final long serialVersionUID = 1L;
+            private final transient SynchronousNonBlockingStep step;
 
             StepExecutionImpl(SynchronousNonBlockingStep step, StepContext context) {
                 super(context);
@@ -231,8 +244,6 @@ public class SynchronousNonBlockingStepExecutionTest {
 
                 return null;
             }
-
-            private static final long serialVersionUID = 1L;
         }
 
         @TestExtension
@@ -252,72 +263,103 @@ public class SynchronousNonBlockingStepExecutionTest {
             public Set<? extends Class<?>> getRequiredContext() {
                 return Collections.singleton(TaskListener.class);
             }
-
         }
-
-        private static final long serialVersionUID = 1L;
-
     }
 
-    @Test public void errors() throws Exception {
+    @Test
+    void errors() throws Exception {
         WorkflowJob p = j.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition("erroneous()", true));
         j.assertLogContains("ought to fail", j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0)));
     }
+
+    @SuppressWarnings("unused")
     public static final class Erroneous extends Step {
-        @DataBoundConstructor public Erroneous() {}
-        @Override public StepExecution start(StepContext context) {
+
+        @DataBoundConstructor
+        public Erroneous() {}
+
+        @Override
+        public StepExecution start(StepContext context) {
             return new Exec(context);
         }
+
         private static final class Exec extends SynchronousNonBlockingStepExecution<Void> {
+
             Exec(StepContext context) {
                 super(context);
             }
-            @Override protected Void run() {
+
+            @Override
+            protected Void run() {
                 throw new AssertionError("ought to fail");
             }
         }
-        @TestExtension("errors") public static final class DescriptorImpl extends StepDescriptor {
-            @Override public Set<? extends Class<?>> getRequiredContext() {
+
+        @TestExtension("errors")
+        public static final class DescriptorImpl extends StepDescriptor {
+
+            @Override
+            public Set<? extends Class<?>> getRequiredContext() {
                 return Collections.emptySet();
             }
-            @Override public String getFunctionName() {
+
+            @Override
+            public String getFunctionName() {
                 return "erroneous";
             }
         }
     }
 
     @Issue("JENKINS-53305")
-    @Test public void contextClassLoader() throws Exception {
+    @Test
+    void contextClassLoader() throws Exception {
         WorkflowJob p = j.createProject(WorkflowJob.class, "p");
-        p.setDefinition(new CpsFlowDefinition("" +
-                // Sets the class loader used to invoke steps to null to demonstrate a potential problem.
-                // I am not sure how this could occur in practice, so this is a very artificial reproduction.
-                "org.jenkinsci.plugins.workflow.cps.CpsVmExecutorService.ORIGINAL_CONTEXT_CLASS_LOADER.set(null)\n" +
-                "checkClassLoader()\n", false));
+        // Sets the class loader used to invoke steps to null to demonstrate a potential problem.
+        // I am not sure how this could occur in practice, so this is a very artificial reproduction.
+        p.setDefinition(new CpsFlowDefinition("""
+                org.jenkinsci.plugins.workflow.cps.CpsVmExecutorService.ORIGINAL_CONTEXT_CLASS_LOADER.set(null)
+                checkClassLoader()
+                """, false));
         j.assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0));
     }
+
+    @SuppressWarnings("unused")
     public static final class CheckClassLoader extends Step {
-        @DataBoundConstructor public CheckClassLoader() {}
-        @Override public StepExecution start(StepContext context) {
+
+        @DataBoundConstructor
+        public CheckClassLoader() {}
+
+        @Override
+        public StepExecution start(StepContext context) {
             return new Exec(context);
         }
+
         private static final class Exec extends SynchronousNonBlockingStepExecution<Void> {
+
             Exec(StepContext context) {
                 super(context);
             }
-            @Override protected Void run() {
+
+            @Override
+            protected Void run() {
                 if (Thread.currentThread().getContextClassLoader() == null) {
                     throw new AssertionError("Context class loader should not be null!");
                 }
                 return null;
             }
         }
-        @TestExtension("contextClassLoader") public static final class DescriptorImpl extends StepDescriptor {
-            @Override public Set<? extends Class<?>> getRequiredContext() {
+
+        @TestExtension("contextClassLoader")
+        public static final class DescriptorImpl extends StepDescriptor {
+
+            @Override
+            public Set<? extends Class<?>> getRequiredContext() {
                 return Collections.emptySet();
             }
-            @Override public String getFunctionName() {
+
+            @Override
+            public String getFunctionName() {
                 return "checkClassLoader";
             }
         }

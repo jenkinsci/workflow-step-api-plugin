@@ -27,23 +27,23 @@ package org.jenkinsci.plugins.workflow.steps;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import hudson.model.Result;
 import hudson.model.Run;
 import jenkins.model.CauseOfInterruption;
 import org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Mock;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 /**
  * Tests some specific {@link FlowInterruptedException} APIs
  */
-public class FlowInterruptedExceptionTest {
+class FlowInterruptedExceptionTest {
 
     @Test
-    public void getMessageReturnsCauses() {
+    void getMessageReturnsCauses() {
         // given
         Result result = Result.ABORTED;
         CauseOfInterruption cause1 = new ExceptionCause(new IllegalStateException("something went wrong"));
@@ -58,11 +58,11 @@ public class FlowInterruptedExceptionTest {
     }
 
     @Test
-    public void toStringContainsCauses() {
+    void toStringContainsCauses() {
         // given
         Result result = Result.FAILURE;
-        Run run = Mockito.mock(Run.class);
-        Mockito.when(run.getDisplayName()).thenReturn("fracture.account");
+        Run run = mock(Run.class);
+        when(run.getDisplayName()).thenReturn("fracture.account");
         CauseOfInterruption cause = new DisableConcurrentBuildsJobProperty.CancelledCause(run);
 
         // when
