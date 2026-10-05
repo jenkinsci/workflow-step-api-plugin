@@ -3,11 +3,12 @@ package org.jenkinsci.plugins.workflow.steps;
 import hudson.Extension;
 import hudson.model.Node;
 import jenkins.model.Jenkins;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -21,21 +22,22 @@ import static org.mockito.Mockito.*;
  * @author Kohsuke Kawaguchi
  */
 @SuppressWarnings("deprecation") // it is all deprecated
-public class AbstractStepImplTest {
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class AbstractStepImplTest {
+    
+    private JenkinsRule j;
 
     @Inject
-    BogusStep.DescriptorImpl d;
+    private BogusStep.DescriptorImpl d;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp(JenkinsRule rule) {
+        j = rule;
         j.getInstance().getInjector().injectMembers(this);
     }
 
     @Test
-    public void inject() throws Exception {
-
+    void inject() throws Exception {
         Map<String, Object> r = new HashMap<>();
         r.put("a",3);
         r.put("b","bbb");
@@ -43,10 +45,10 @@ public class AbstractStepImplTest {
         r.put("d","ddd");
         BogusStep step = (BogusStep) d.newInstance(r);
 
-        assertEquals(step.a,3);
-        assertEquals(step.b,"bbb");
+        assertEquals(3, step.a);
+        assertEquals("bbb", step.b);
         assertNull(step.c);
-        assertEquals(step.d,"ddd");
+        assertEquals("ddd", step.d);
 
         StepContext c = mock(StepContext.class);
         when(c.get(Node.class)).thenReturn(j.getInstance());
@@ -56,10 +58,12 @@ public class AbstractStepImplTest {
     }
 
     public static class BogusStep extends AbstractStepImpl {
-        int a;
-        String b;
-        @DataBoundSetter String c;
-        Object d;
+
+        private int a;
+        private String b;
+        @DataBoundSetter
+        private String c;
+        private Object d;
 
         @DataBoundConstructor
         public BogusStep(int a, String b) {
@@ -92,11 +96,12 @@ public class AbstractStepImplTest {
     }
 
     public static class BogusStepExecution extends AbstractSynchronousStepExecution<Void> {
+
         @Inject
-        Jenkins jenkins;
+        private Jenkins jenkins;
 
         @StepContextParameter
-        Node n;
+        private Node n;
 
         @Override
         protected Void run() {
