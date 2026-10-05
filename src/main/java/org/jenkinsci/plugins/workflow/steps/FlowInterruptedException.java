@@ -32,7 +32,9 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -122,6 +124,19 @@ public final class FlowInterruptedException extends InterruptedException {
      * If a build catches this exception, it should use this method to report it.
      */
     public void handle(Run<?,?> run, TaskListener listener) {
+        handle(run, listener, Collections.newSetFromMap(new IdentityHashMap<>()));
+    }
+
+    /**
+     * Cause and suppressed exceptions can form a cycle, e.g. when a {@code parallel} step's
+     * branches are interrupted simultaneously and cross-attach each other as suppressed.
+     * {@code visited} breaks such cycles: a {@link Throwable} already handled is not walked
+     * again.
+     */
+    private void handle(Run<?,?> run, TaskListener listener, Set<Throwable> visited) {
+        if (!visited.add(this)) {
+            return;
+        }
         Set<CauseOfInterruption> boundCauses = new HashSet<>();
         for (InterruptedBuildAction a : run.getActions(InterruptedBuildAction.class)) {
             boundCauses.addAll(a.getCauses());
@@ -134,16 +149,16 @@ public final class FlowInterruptedException extends InterruptedException {
                 cause.print(listener);
             }
         }
-        print(getCause(), run, listener);
+        print(getCause(), run, listener, visited);
         for (Throwable t : getSuppressed()) {
-            print(t, run, listener);
+            print(t, run, listener, visited);
         }
     }
-    private static void print(@CheckForNull Throwable t, Run<?,?> run, @NonNull TaskListener listener) {
+    private static void print(@CheckForNull Throwable t, Run<?,?> run, @NonNull TaskListener listener, @NonNull Set<Throwable> visited) {
         if (t instanceof AbortException) {
             listener.getLogger().println(t.getMessage());
         } else if (t instanceof FlowInterruptedException) {
-            ((FlowInterruptedException) t).handle(run, listener);
+            ((FlowInterruptedException) t).handle(run, listener, visited);
         } else if (t != null) {
             Functions.printStackTrace(t, listener.getLogger());
         }
