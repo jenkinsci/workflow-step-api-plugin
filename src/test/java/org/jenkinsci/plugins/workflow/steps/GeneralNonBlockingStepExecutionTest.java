@@ -24,10 +24,11 @@
 
 package org.jenkinsci.plugins.workflow.steps;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import hudson.model.Result;
 import hudson.model.TaskListener;
@@ -41,26 +42,41 @@ import org.jenkinsci.plugins.workflow.cps.CpsStepContext;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.test.steps.SemaphoreStep;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.BuildWatcher;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.LoggerRule;
+import org.jvnet.hudson.test.LogRecorder;
 import org.jvnet.hudson.test.TestExtension;
+import org.jvnet.hudson.test.junit.jupiter.BuildWatcherExtension;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class GeneralNonBlockingStepExecutionTest {
+@WithJenkins
+class GeneralNonBlockingStepExecutionTest {
 
-    @ClassRule public static BuildWatcher buildWatcher = new BuildWatcher();
+    @SuppressWarnings("unused")
+    @RegisterExtension
+    private static final BuildWatcherExtension BUILD_WATCHER = new BuildWatcherExtension();
 
-    @Rule public JenkinsRule r = new JenkinsRule();
+    private static Semaphore startEnter, startExit, endEnter, endExit;
 
-    @Rule public LoggerRule logging = new LoggerRule();
+    private final LogRecorder logging = new LogRecorder();
 
-    @Test public void getStatus() throws Exception {
+    private JenkinsRule r;
+
+    @BeforeEach
+    void setUp(JenkinsRule rule) {
+        r = rule;
+        startEnter = new Semaphore(0);
+        startExit = new Semaphore(0);
+        endEnter = new Semaphore(0);
+        endExit = new Semaphore(0);
+    }
+
+    @Test
+    void getStatus() throws Exception {
         WorkflowJob p = r.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition("slowBlock {semaphore 'wait'}", true));
         WorkflowRun b = p.scheduleBuild2(0).waitForStart();
@@ -71,9 +87,7 @@ public class GeneralNonBlockingStepExecutionTest {
         startExit.release();
         SemaphoreStep.waitForStart("wait/1", b);
         assertThat(((CpsFlowExecution) b.getExecution()).getThreadDump().toString(), containsString("at DSL.slowBlock(not currently scheduled, or running blocks)"));
-        while (b.getExecutor().getAsynchronousExecution().blocksRestart()) {
-            Thread.sleep(100); // as above
-        }
+        await().until(() -> !b.getExecutor().getAsynchronousExecution().blocksRestart());
         SemaphoreStep.success("wait/1", null);
         endEnter.acquire();
         assertThat(((CpsFlowExecution) b.getExecution()).getThreadDump().toString(), containsString("at DSL.slowBlock(running in thread: org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution [#"));
@@ -83,7 +97,8 @@ public class GeneralNonBlockingStepExecutionTest {
         r.assertBuildStatusSuccess(r.waitForCompletion(b));
     }
 
-    @Test public void stop() throws Exception {
+    @Test
+    void stop() throws Exception {
         WorkflowJob p = r.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition("slowBlock {semaphore 'wait'}", true));
         logging.record(CpsStepContext.class, Level.WARNING).capture(100);
@@ -120,7 +135,8 @@ public class GeneralNonBlockingStepExecutionTest {
     }
 
     @Issue("JENKINS-58878")
-    @Test public void shouldNotHang() throws Exception {
+    @Test
+    void shouldNotHang() throws Exception {
         int iterations = 50;
         startExit.release(iterations); // Prevents the semaphores from blocking inside of the slowBlock step.
         endExit.release(iterations);
@@ -134,34 +150,36 @@ public class GeneralNonBlockingStepExecutionTest {
         r.buildAndAssertSuccess(p);
     }
 
-    private static Semaphore startEnter, startExit, endEnter, endExit;
-
-    @Before public void semaphores() {
-        startEnter = new Semaphore(0);
-        startExit = new Semaphore(0);
-        endEnter = new Semaphore(0);
-        endExit = new Semaphore(0);
-    }
-
+    @SuppressWarnings("unused")
     public static final class SlowBlockStep extends Step {
-        @DataBoundConstructor public SlowBlockStep() {}
-        @Override public StepExecution start(StepContext context) {
+
+        @DataBoundConstructor
+        public SlowBlockStep() {}
+
+        @Override
+        public StepExecution start(StepContext context) {
             return new Execution(context, this);
         }
+
         private static final class Execution extends GeneralNonBlockingStepExecution {
             private final transient SlowBlockStep step;
+
             Execution(StepContext context, SlowBlockStep step) {
                 super(context);
                 this.step = step;
             }
+
             private void println(String msg) throws Exception {
                 getContext().get(TaskListener.class).getLogger().println(msg);
             }
-            @Override public boolean start() throws Exception {
+
+            @Override
+            public boolean start() throws Exception {
                 println("starting step");
                 run(this::doStart);
                 return false;
             }
+
             private void doStart() throws Exception {
                 println("starting background part of step");
                 startEnter.release();
@@ -169,8 +187,11 @@ public class GeneralNonBlockingStepExecutionTest {
                 println("starting body");
                 getContext().newBodyInvoker().withCallback(new Callback()).start();
             }
+
             private final class Callback extends TailCall {
-                @Override protected void finished(StepContext context) throws Exception {
+
+                @Override
+                protected void finished(StepContext context) throws Exception {
                     println("body completed, starting background end part of step");
                     endEnter.release();
                     endExit.acquire();
@@ -178,17 +199,23 @@ public class GeneralNonBlockingStepExecutionTest {
                 }
             }
         }
-        @TestExtension public static final class DescriptorImpl extends StepDescriptor {
-            @Override public String getFunctionName() {
+        @TestExtension
+        public static final class DescriptorImpl extends StepDescriptor {
+
+            @Override
+            public String getFunctionName() {
                 return "slowBlock";
             }
-            @Override public Set<? extends Class<?>> getRequiredContext() {
+
+            @Override
+            public Set<? extends Class<?>> getRequiredContext() {
                 return Collections.singleton(TaskListener.class);
             }
-            @Override public boolean takesImplicitBlockArgument() {
+
+            @Override
+            public boolean takesImplicitBlockArgument() {
                 return true;
             }
         }
     }
-
 }

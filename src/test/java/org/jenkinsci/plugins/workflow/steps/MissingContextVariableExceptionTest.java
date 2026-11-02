@@ -27,18 +27,25 @@ package org.jenkinsci.plugins.workflow.steps;
 import hudson.model.Result;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public final class MissingContextVariableExceptionTest {
+@WithJenkins
+class MissingContextVariableExceptionTest {
 
-    @Rule public JenkinsRule r = new JenkinsRule();
+    private JenkinsRule r;
 
-    @Test public void message() throws Exception {
+    @BeforeEach
+    void setUp(JenkinsRule rule) {
+        r = rule;
+    }
+
+    @Test
+    void message() throws Exception {
         WorkflowJob p = r.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition("sh 'oops'", true));
         r.assertLogContains("Perhaps you forgot to surround the sh step with a step that provides this, such as: node", r.buildAndAssertStatus(Result.FAILURE, p));
     }
-
 }

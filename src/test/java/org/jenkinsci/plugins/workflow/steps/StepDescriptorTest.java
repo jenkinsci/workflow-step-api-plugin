@@ -24,25 +24,27 @@
 
 package org.jenkinsci.plugins.workflow.steps;
 
-import org.junit.Assert;
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import java.util.HashMap;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.concurrent.TimeUnit;
 
 /**
  * Tests some specific {@link StepDescriptor} APIs
  */
-public class StepDescriptorTest {
+class StepDescriptorTest {
 
     @Test
-    public void testStringFormattingAllowed() {
-        Assert.assertFalse(StepDescriptor.isAbleToUseToStringForDisplay(null));
-        Assert.assertFalse(StepDescriptor.isAbleToUseToStringForDisplay(new HashMap<String, String>()));
-        Assert.assertTrue(StepDescriptor.isAbleToUseToStringForDisplay("cheese"));
-        Assert.assertTrue(StepDescriptor.isAbleToUseToStringForDisplay(-1));
-        Assert.assertTrue(StepDescriptor.isAbleToUseToStringForDisplay(Boolean.FALSE));
-        Assert.assertTrue(StepDescriptor.isAbleToUseToStringForDisplay(TimeUnit.MINUTES));
-        Assert.assertTrue(StepDescriptor.isAbleToUseToStringForDisplay(new StringBuffer("gopher")));
+    void testStringFormattingAllowed() {
+        assertFalse(StepDescriptor.isAbleToUseToStringForDisplay(null));
+        assertFalse(StepDescriptor.isAbleToUseToStringForDisplay(new HashMap<String, String>()));
+        assertTrue(StepDescriptor.isAbleToUseToStringForDisplay("cheese"));
+        assertTrue(StepDescriptor.isAbleToUseToStringForDisplay(-1));
+        assertTrue(StepDescriptor.isAbleToUseToStringForDisplay(Boolean.FALSE));
+        assertTrue(StepDescriptor.isAbleToUseToStringForDisplay(TimeUnit.MINUTES));
+        assertTrue(StepDescriptor.isAbleToUseToStringForDisplay(new StringBuffer("gopher")));
     }
 }
